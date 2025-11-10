@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "betterwithoutwolves",
+  "version": "${version}",
+  "name": "Better Without Wolves",
+  "description": "This addon puts wolves in an invisible, incorporeal stasis, making it seem like they're all gone from the game.",
+  "authors": [
+    "Abigail Read"
+  ],
+  "contact": {
+    "homepage": "https://github.com/AbbyRead/BTW-BetterWithoutWolves",
+    "sources": "https://github.com/AbbyRead/BTW-BetterWithoutWolves",
+    "issues": "https://github.com/AbbyRead/BTW-BetterWithoutWolves/issues"
+  },
+  "license": "0BSD",
+  "icon": "assets/betterwithoutwolves/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "btw:addon": [
+      "btw.community.betterwithoutwolves.BetterWithoutWolvesAddon"
+    ]
+  },
+  "custom": {
+    "btw:addon_prefix": "AR_BWW"
+  },
+  "mixins": [
+    "betterwithoutwolves.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": "1.6.4"
+  }
+}
