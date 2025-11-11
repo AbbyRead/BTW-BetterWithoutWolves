@@ -70,6 +70,8 @@ src/main/
 
 ## Building from Source
 
+Kind of a clusterfudge at the moment since I had to target the actual names of certain methods in DireWolfEntity.  Not sure what's up with that.  It builds and works, but running from the dev environment is broken, and I don't know how to fix it.
+
 Requirements:
 - Java 17
 - BTW CE 3.0.0 Intermediary Distribution (get from the Pinned section of [#learn-modding](https://discord.com/channels/252863009590870017/1222644129696059392/) on the BTW CE Discord channel)
