@@ -2,20 +2,18 @@
 
 **An addon that finally delivers on the parent mod's titular gripe.**
 
-The 'Better Than Wolves' mod was created because wolves are a "lame" and "bad idea."  I can't and won't argue with that; FC, I get you.
+The 'Better Than Wolves' mod was created because wolves are "lame" and "a bad idea".  I can't and won't argue with that; FC, I get you.
 
 ...Then as a manic thought experiment, FlowerChild made them loud, scary, sometimes literally possessed, and full of poop.  What a pain.
 
 This addon puts it all to rest in more ways than figurative.  While this mod is active, wolves go into an invisible, harmless stasis. There they will stay for the duration: silent, paralyzed, immobile, immortal.
 
-Need to progress with them still?  Alright, uninstall the mod.  I don't give a poop! 😤
-
-For real though, this doesn't take away anything permanently.  Once the addon is uninstalled, your game goes back to the way things were.
+Need to progress with them still?  Alright, uninstall the mod.  For real though, this addon doesn't take away anything _permanently_.  Once it's uninstalled, the wolves will all pop right back into your game, no different than they were prior to installing B-w/o-W.
 
 Some wolf-related stuff isn't even taken away at all:
-- Like your wolfchop stockpile?  Good, I don't touch that.  
-- Have a tier 4 dung beacon?  Congrats, you're all set.
-- Companion cube unharmed (by me at least; you, I don't know).
+- Enjoying your wolfchop stockpile?  Good, I don't touch that.
+- Have a tier-4 dung beacon?  Congrats, you're all set.
+- Companion Cube: unharmed (by me at least; you, I don't know).
 
 ---
 
@@ -23,14 +21,14 @@ Some wolf-related stuff isn't even taken away at all:
 
 When this addon is active, wolves are:
 
-- ✓ **Invisible** - Cannot be seen by players (including the dire wolf's glowing eyes).
+- ✓ **Invisible** - Cannot be seen by players.
 - ✓ **Immobile** - Frozen in place, no AI or movement.
 - ✓ **Immortal** - Cannot take damage or die from any source.
 - ✓ **Incorporeal** - No collision, you walk right through them.
 - ✓ **Silent** - No barks, growls, howls, or footstep sounds.
 - ✓ **Non-interactive** - Cannot be fed, petted, or dyed.
 - ✓ **Sterile** - Cannot breed or produce offspring.
-- ✓ **Inert** - No eating, pooping, transformation to dire wolves, dire wolf sun-fire damage, or howling countdowns.
+- ✓ **Inert** - No eating, pooping, transformation to dire wolves, etc.
 - ✓ **Absent-of-Possession** - Truly nothing to worry about.
 
 **Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
@@ -77,17 +75,15 @@ Requirements:
 - Java 17
 - BTW CE 3.0.0 Intermediary Distribution (get from the Pinned section of [#learn-modding](https://discord.com/channels/252863009590870017/1222644129696059392/) on the BTW CE Discord channel)
 
-```bash
-# Clone the repository
-git clone [https://github.com/AbbyRead/BTW-BetterWithoutWolves.git](https://github.com/AbbyRead/BTW-BetterWithoutWolves.git)
-cd BTW-BetterWithoutWolves
-
-# Build the mod
-Drag&Drop the BTW intermediary .zip file onto the install.bat
-Wait till it fully finishes
+```
+Build the addon:
+(Windows) Drag and drop the BTW Intermediary .zip file onto the install.bat
+(Unix-likes) ./install.sh <the BTW Intermediary .zip>
+Wait until it fully finishes.
 Run the gradle task "build": ./gradlew build
 
-# Output: build/libs/Better-Without-Wolves-<version>.jar
+Compiled output:
+build/libs/Better-Without-Wolves-<version>.jar
 ```
 
 ---
@@ -116,11 +112,13 @@ This approach should work alongside most other mods. However, conflicts could ar
 ## License
 
 Released under the **0BSD** license.
-Free to use, copy, and modify — attribution appreciated but not required.
+
+You are completely free to use, copy, and modify it how you like.
 
 ---
 
 ## Credits
 
 Created by **Abigail Read**
+
 Special thanks to the BTW CE community for documentation and support!
