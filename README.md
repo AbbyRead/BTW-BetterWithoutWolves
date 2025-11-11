@@ -2,7 +2,7 @@
 
 **An addon that finally delivers on the parent mod's titular gripe.**
 
-The 'Better Than Wolves' mod was created because wolves are a "lame" and "bad idea."  I can't and won't argue with that; FC, I get you.
+The 'Better Than Wolves' mod was created because wolves are "lame" and "a bad idea".  I can't and won't argue with that; FC, I get you.
 
 ...Then as a manic thought experiment, FlowerChild made them loud, scary, sometimes literally possessed, and full of poop.  What a pain.
 
