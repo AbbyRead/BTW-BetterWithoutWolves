@@ -11,7 +11,6 @@ This addon puts it all to rest in more ways than figurative.  While this mod is 
 Need to progress with them still?  Alright, uninstall the mod.  I don't give a poop! 😤
 
 For real though, this doesn't take away anything permanently.  Once the addon is uninstalled, your game goes back to the way things were.
-- Hopefully you didn't put a block where your precious pup was standing though.
 
 Some wolf-related stuff isn't even taken away at all:
 - Like your wolfchop stockpile?  Good, I don't touch that.  
@@ -35,6 +34,8 @@ When this addon is active, wolves are:
 - ✓ **Absent-of-Possession** - Truly nothing to worry about.
 
 **Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
+
+**Known Bug/Feature:** You can't place blocks where the wolves are, in the same way it would prevent you normally.
 
 ---
 
