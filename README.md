@@ -13,7 +13,7 @@ Need to progress with them still?  Alright, uninstall the mod.  For real though,
 Some wolf-related stuff isn't even taken away at all:
 - Like your wolfchop stockpile?  Good, I don't touch that.  
 - Have a tier 4 dung beacon?  Congrats, you're all set.
-- Companion cube unharmed (by me at least; you, I don't know).
+- Companion Cube: unharmed (by me at least; you, I don't know).
 
 ---
 
