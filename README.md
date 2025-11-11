@@ -78,12 +78,9 @@ Requirements:
 - BTW CE 3.0.0 Intermediary Distribution (get from the Pinned section of [#learn-modding](https://discord.com/channels/252863009590870017/1222644129696059392/) on the BTW CE Discord channel)
 
 ```
-Clone the repository:
-git clone [https://github.com/AbbyRead/BTW-BetterWithoutWolves.git](https://github.com/AbbyRead/BTW-BetterWithoutWolves.git)
-cd BTW-BetterWithoutWolves
-
-Build the mod:
-Drag&Drop the BTW intermediary .zip file onto the install.bat
+Build the addon:
+(Windows) Drag and drop the BTW Intermediary .zip file onto the install.bat
+(Unix-likes) ./install.sh <the BTW Intermediary .zip>
 Wait until it fully finishes.
 Run the gradle task "build": ./gradlew build
 
