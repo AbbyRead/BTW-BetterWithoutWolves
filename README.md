@@ -61,12 +61,15 @@ that his great prospects might continue unbroken.
 src/main/
 ├── java/btw/community/betterwithoutwolves/
 │   ├── BetterWithoutWolvesAddon.java        # Addon entry point
+│   ├── util/
+│   │   └── PoopCats.java                    # Core cats-pooping logic
 │   └── mixin/
 │       ├── DireWolfEntityMixin.java         # Core beast behavior hooks
 │       ├── EntityLivingBaseMixin.java       # Inherited behavior hooks
 │       ├── EntityWolfMixin.java             # Core wolf behavior hooks
+│       ├── EntityOcelotMixin.java           # Allow poop cats
 │       └── client/
-│           └── DireWolfRendererMixin.java   # To hide beasts' glowing eyes
+│           └── DireWolfRendererMixin.java   # To hide beast eyes
 └── resources/
     ├── assets/betterwithoutwolves/icon.png  # Addon thumbnail
     ├── betterwithoutwolves.mixins.json      # Mixin configuration
