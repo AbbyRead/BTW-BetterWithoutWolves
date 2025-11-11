@@ -8,7 +8,7 @@ The 'Better Than Wolves' mod was created because wolves are "lame" and "a bad id
 
 This addon puts it all to rest in more ways than figurative.  While this mod is active, wolves go into an invisible, harmless stasis. There they will stay for the duration: silent, paralyzed, immobile, immortal.
 
-Need to progress with them still?  Alright, uninstall the mod.  For real though, this addon doesn't take away anything _permanently_.  Once it's uninstalled, the wolves will all pop right back into your game, no different than they were prior to installing B w/o W.
+Need to progress with them still?  Alright, uninstall the mod.  For real though, this addon doesn't take away anything _permanently_.  Once it's uninstalled, the wolves will all pop right back into your game, no different than they were prior to installing B-w/o-W.
 
 Some wolf-related stuff isn't even taken away at all:
 - Enjoying your wolfchop stockpile?  Good, I don't touch that.  
