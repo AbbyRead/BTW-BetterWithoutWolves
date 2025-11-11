@@ -11,7 +11,7 @@ This addon puts it all to rest in more ways than figurative.  While this mod is 
 Need to progress with them still?  Alright, uninstall the mod.  For real though, this addon doesn't take away anything _permanently_.  Once it's uninstalled, the wolves will all pop right back into your game, no different than they were prior to installing B w/o W.
 
 Some wolf-related stuff isn't even taken away at all:
-- Like your wolfchop stockpile?  Good, I don't touch that.  
+- Enjoying your wolfchop stockpile?  Good, I don't touch that.  
 - Have a tier-4 dung beacon?  Congrats, you're all set.
 - Companion Cube: unharmed (by me at least; you, I don't know).
 
