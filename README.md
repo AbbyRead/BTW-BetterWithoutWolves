@@ -56,11 +56,11 @@ src/main/
 ├── java/btw/community/betterwithoutwolves/
 │   ├── BetterWithoutWolvesAddon.java        # Addon entry point
 │   └── mixin/
-│       ├── MixinDireWolfEntity.java         # Core beast behavior hooks
-│       ├── MixinEntityLivingBase.java       # Inherited behavior hooks
-│       ├── MixinEntityWolf.java             # Core wolf behavior hooks
+│       ├── DireWolfEntityMixin.java         # Core beast behavior hooks
+│       ├── EntityLivingBaseMixin.java       # Inherited behavior hooks
+│       ├── EntityWolfMixin.java             # Core wolf behavior hooks
 │       └── client/
-│           └── MixinDireWolfRenderer.java   # To hide beasts' glowing eyes
+│           └── DireWolfRendererMixin.java   # To hide beasts' glowing eyes
 └── resources/
     ├── assets/betterwithoutwolves/icon.png  # Addon thumbnail
     ├── betterwithoutwolves.mixins.json      # Mixin configuration

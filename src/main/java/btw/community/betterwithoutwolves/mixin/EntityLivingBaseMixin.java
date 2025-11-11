@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityLivingBase.class)
-public abstract class MixinEntityLivingBase {
+public abstract class EntityLivingBaseMixin {
 	@Inject(method = "canBeCollidedWith", at = @At("HEAD"), cancellable = true)
 	private void disableWolfCollision(CallbackInfoReturnable<Boolean> cir) {
 		EntityLivingBase self = (EntityLivingBase) (Object) this;

@@ -8,11 +8,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityWolf.class)
-public abstract class MixinEntityWolf {
+public abstract class EntityWolfMixin {
 
 	// Since EntityWolf doesn't override these:
-	// See MixinEntityLivingBase.java for "canBeCollidedWith"
-	// See MixinEntityLivingBase.java for "canBePushed"
+	// See EntityLivingBaseMixin.java for "canBeCollidedWith"
+	// See EntityLivingBaseMixin.java for "canBePushed"
 
 	// Make wolves invisible
 	@Inject(method = "onLivingUpdate", at = @At("HEAD"))

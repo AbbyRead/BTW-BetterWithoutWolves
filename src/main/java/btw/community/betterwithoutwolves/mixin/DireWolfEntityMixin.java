@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 //   the actual obfuscated names these methods end up as, rather than
 //   what the official source code has them as pre-compilation.
 @Mixin(DireWolfEntity.class)
-public abstract class MixinDireWolfEntity {
+public abstract class DireWolfEntityMixin {
 
 	// 1. Disable all AI / Freeze movement and behavior
 	// Target: isAIEnabled (obfuscated to method_2608)
