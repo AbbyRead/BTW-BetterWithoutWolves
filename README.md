@@ -30,7 +30,7 @@ When this addon is active, wolves are:
 - ✓ **Silent** - No barks, growls, howls, or footstep sounds.
 - ✓ **Non-interactive** - Cannot be fed, petted, or dyed.
 - ✓ **Sterile** - Cannot breed or produce offspring.
-- ✓ **Inert** - No eating, pooping, transformation to dire wolves, dire wolf sun-fire damage, or howling countdowns.
+- ✓ **Inert** - No eating, pooping, transformation to dire wolves, etc.
 - ✓ **Absent-of-Possession** - Truly nothing to worry about.
 
 **Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
