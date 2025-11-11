@@ -1,16 +1,28 @@
 # Better Without Wolves
 
-**A reversible BTW CE addon that makes wolves completely disappear from the game without actually removing them.**
+**An addon that finally delivers on the parent mod's titular gripe.**
 
-This Better Than Wolves CE addon makes it *seem* like wolves are gone from the game (without actually removing them). Wolves and Dire Wolves become paralyzed, invisible, immobile, immortal, incorporeal, and silent while the addon is installed. They do not eat, they do not poop, they do not howl, they cannot breed, and they cannot transform into dire wolves.
+The 'Better Than Wolves' mod was created because wolves are a "lame" and "bad idea."  I can't and won't argue with that; FC, I get you.
 
-**Install or uninstall this addon to essentially toggle wolves on and off.**
+...Then as a manic thought experiment, FlowerChild made them loud, scary, sometimes literally possessed, and full of poop.  What a pain.
+
+This addon puts it all to rest in more ways than figurative.  While this mod is active, wolves go into an invisible, harmless stasis. There they will stay for the duration: silent, paralyzed, immobile, immortal.
+
+Need to progress with them still?  Alright, uninstall the mod.  I don't give a poop! 😤
+
+For real though, this doesn't take away anything permanently.  Once the addon is uninstalled, your game goes back to the way things were.
+- Hopefully you didn't put a block where your precious pup was standing though.
+
+Some wolf-related stuff isn't even taken away at all:
+- Like your wolfchop stockpile?  Good, I don't touch that.  
+- Have a tier 4 dung beacon?  Congrats, you're all set.
+- Companion cube unharmed (by me at least; you, I don't know).
 
 ---
 
 ## Features
 
-When this addon is active, wolves and dire wolves are:
+When this addon is active, wolves are:
 
 - ✓ **Invisible** - Cannot be seen by players (including the dire wolf's glowing eyes).
 - ✓ **Immobile** - Frozen in place, no AI or movement.
@@ -20,29 +32,9 @@ When this addon is active, wolves and dire wolves are:
 - ✓ **Non-interactive** - Cannot be fed, petted, or dyed.
 - ✓ **Sterile** - Cannot breed or produce offspring.
 - ✓ **Inert** - No eating, pooping, transformation to dire wolves, dire wolf sun-fire damage, or howling countdowns.
-- ✓ **Possession Effect Halted** - Truly nothing to worry about.
+- ✓ **Absent-of-Possession** - Truly nothing to worry about.
 
-**Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to normal behavior!
-
----
-
-## Technical Details
-
-This addon demonstrates advanced BTW modding techniques:
-
-### Non-Destructive Approach
-- Uses Mixin injections to modify behavior without replacing classes.
-- Wolves remain in world save data, just inactive.
-- 100% reversible - no data corruption or entity deletion.
-
-### What Gets Disabled
-All wolf behaviors are frozen:
-- Core AI (movement, pathfinding, targeting)
-- Interactions (feeding, taming, collar dyeing)
-- Sounds (barking, growling, howling, footsteps)
-- Physical presence (collision, pushing, damage)
-- Biological needs (eating, hunger, mating, pooping)
-- BTW-specific mechanics (possession, beast transformation, etc.)
+**Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
 
 ---
 
