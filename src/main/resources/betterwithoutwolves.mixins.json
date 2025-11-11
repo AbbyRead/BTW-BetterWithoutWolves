@@ -4,6 +4,9 @@
   "package": "btw.community.betterwithoutwolves.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MixinDireWolfEntity",
+    "MixinEntityLivingBase",
+    "MixinEntityWolf"
   ],
   "injectors": {
     "defaultRequire": 1
