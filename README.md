@@ -33,6 +33,14 @@ When this addon is active, wolves are:
 
 **Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
 
+**The Fecal Contingency: Verse 1, Version 1.1**
+Lo, as the wolves were cast out, the flow of dung was stayed.
+And Steve, Son of Sam, turned his gaze upon the ocelot,
+that his great prospects might continue unbroken.
+
+- Cats poop now.
+- Don't fight me.
+
 **Known Bug/Feature:** You can't directly place blocks where the wolves are, in the same way it would prevent you normally.
 
 ---
