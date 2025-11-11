@@ -87,26 +87,21 @@ git clone https://github.com/AbbyRead/BTW-BetterWithoutWolves.git
 cd BTW-BetterWithoutWolves
 
 # Build the mod
-Drag&Drop the intermediary .zip file onto the install.bat
+Drag&Drop the BTW intermediary .zip file onto the install.bat
 Wait till it fully finishes
-Run the gradle task "build":
-./gradlew build
+Run the gradle task "build": ./gradlew build
 
 # Output: build/libs/Better-Without-Wolves-<version>.jar
 ```
-
-Then you either plug that right into your game, or you can use `./gradlew runClient` to test it first.
 
 ---
 
 ## Compatibility
 
-- **Minecraft Version:** 1.6.4
 - **BTW CE Version:** 3.0.0
-- **Fabric Loader:** 0.14.19+
-- **Java:** 17
+- **Java:** 17 or higher
 
-**Mod Compatibility:** This addon should work alongside most other mods since it doesn't replace wolf classes or remove entities. It only modifies behavior through runtime hooks.
+**Cross-Addon Compatibility:** This addon is designed to work well alongside most others since it doesn't replace wolf classes or remove entities.
 
 ---
 
