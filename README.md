@@ -8,12 +8,13 @@ The 'Better Than Wolves' mod was created because wolves are "lame" and "a bad id
 
 This addon puts it all to rest in more ways than figurative.  While this mod is active, wolves go into an invisible, harmless stasis. There they will stay for the duration: silent, paralyzed, immobile, immortal.
 
-Need to progress with them still?  Alright, uninstall the mod.  For real though, this addon doesn't take away anything _permanently_.  Once it's uninstalled, the wolves will all pop right back into your game, no different than they were prior to installing B-w/o-W.
+Need to progress with them still?  Alright, uninstall the mod.  For real though, this addon doesn't take away anything *permanently*.  Once it's uninstalled, the wolves will all pop right back into your game, no different than they were prior to installing B-w/o-W.
 
 Some wolf-related stuff isn't even taken away at all:
-- Enjoying your wolfchop stockpile?  Good, I don't touch that.
-- Have a tier-4 dung beacon?  Congrats, you're all set.
-- Companion Cube: unharmed (by me at least; you, I don't know).
+
+* Enjoying your wolfchop stockpile?  Good, I don't touch that.
+* Have a tier-4 dung beacon?  Congrats, you're all set.
+* Companion Cube: unharmed (by me at least; you, I don't know).
 
 ---
 
@@ -21,15 +22,15 @@ Some wolf-related stuff isn't even taken away at all:
 
 When this addon is active, wolves are:
 
-- ✓ **Invisible** - Cannot be seen by players.
-- ✓ **Immobile** - Frozen in place, no AI or movement.
-- ✓ **Immortal** - Cannot take damage or die from any source.
-- ✓ **Incorporeal** - No collision, you walk right through them.
-- ✓ **Silent** - No barks, growls, howls, or footstep sounds.
-- ✓ **Non-interactive** - Cannot be fed, petted, or dyed.
-- ✓ **Sterile** - Cannot breed or produce offspring.
-- ✓ **Inert** - No eating, pooping, transformation to dire wolves, etc.
-- ✓ **Absent-of-Possession** - Truly nothing to worry about.
+* ✓ **Invisible** – Cannot be seen by players.
+* ✓ **Immobile** – Frozen in place, no AI or movement.
+* ✓ **Immortal** – Cannot take damage or die from any source.
+* ✓ **Incorporeal** – No collision, you walk right through them.
+* ✓ **Silent** – No barks, growls, howls, or footstep sounds.
+* ✓ **Non-interactive** – Cannot be fed, petted, or dyed.
+* ✓ **Sterile** – Cannot breed or produce offspring.
+* ✓ **Inert** – No eating, pooping, transformation to dire wolves, etc.
+* ✓ **Absent-of-Possession** – Truly nothing to worry about.
 
 **Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
 
@@ -49,7 +50,7 @@ that his great prospects might continue unbroken.
 
 1. Build the addon or download the latest release.
 2. Place `Better-Without-Wolves-<version>.jar` in your `mods/` folder.
-3. Launch your copy of Minecraft 1.6.4 with BTW CE 3.0.0 and Legacy Fabric.  See the [BTW CE 3.0.0 Installation Guide](https://wiki.btwce.com/view/Installation) for those details if you haven't already.
+3. Launch Minecraft 1.6.4 with BTW CE 3.0.0 and Legacy Fabric instance. See the [BTW CE 3.0.0 Installation Guide](https://wiki.btwce.com/view/Installation) for details.
 
 **To restore wolves:** Simply remove the mod and restart the game!
 
@@ -80,11 +81,11 @@ src/main/
 
 ## Building from Source
 
-Kind of a clusterfudge at the moment since I had to target the actual names of certain methods in DireWolfEntity.  Not sure what's up with that.  It builds and works, but running from the dev environment is broken, and I don't know how to fix it.
+Kind of a clusterfudge at the moment since I had to target the actual names of certain methods in `DireWolfEntity`.  Not sure what's up with that.  It builds and works, but running from the dev environment is broken, and I don't know how to fix it.
 
 Requirements:
-- Java 17
-- BTW CE 3.0.0 Intermediary Distribution (get from the Pinned section of [#learn-modding](https://discord.com/channels/252863009590870017/1222644129696059392/) on the BTW CE Discord channel)
+* Java 17
+* BTW CE 3.0.0 Intermediary Distribution (get from the Pinned section of [#learn-modding](https://discord.com/channels/252863009590870017/1222644129696059392/) on the BTW CE Discord channel)
 
 ```
 Build the addon:
@@ -101,22 +102,21 @@ build/libs/Better-Without-Wolves-<version>.jar
 
 ## Compatibility
 
-- **BTW CE Version:** 3.0.0
-- **Java:** 17 or higher
+* **BTW CE Version:** 3.0.0
+* **Java:** 17 or higher
 
-**Cross-Addon Compatibility:** This addon is designed for high compatibility, as it doesn't replace wolf classes or remove entities. It uses Mixin `HEAD` injections to preemptively cancel specific behaviors.
-
-This approach should work alongside most other mods. However, conflicts could arise if another addon attempts to modify the *exact same* methods. In cases where another mod also alters wolf behavior, this addon's disabling effects will likely take priority.
+**Cross-Addon Compatibility:**
+This addon avoids replacing entity classes outright, using Mixin `HEAD`/`TAIL` injections instead. It primarily cancels wolf behaviors and adds lightweight logic for cat behavior, so conflicts are unlikely unless another addon modifies those same methods directly.
 
 ---
 
 ## Links
 
-- [BTW Gradle Fabric Example](https://github.com/BTW-Community/BTW-gradle-fabric-example)
-- [Legacy Fabric Wiki](https://fabricmc.net/wiki/)
-- [BTW CE Wiki](https://wiki.btwce.com/)
-- [BTW CE Discord](https://discord.btwce.com/)
-- [GitHub Repository](https://github.com/AbbyRead/BTW-BetterWithoutWolves)
+* [BTW Gradle Fabric Example](https://github.com/BTW-Community/BTW-gradle-fabric-example)
+* [Legacy Fabric Wiki](https://fabricmc.net/wiki/)
+* [BTW CE Wiki](https://wiki.btwce.com/)
+* [BTW CE Discord](https://discord.btwce.com/)
+* [GitHub Repository](https://github.com/AbbyRead/BTW-BetterWithoutWolves)
 
 ---
 
