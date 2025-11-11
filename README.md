@@ -35,7 +35,7 @@ When this addon is active, wolves are:
 
 **Most importantly:** Wolves remain as valid entities in your save file. Uninstall the addon and they instantly return to their normal, questionable behavior.
 
-**Known Bug/Feature:** You can't place blocks where the wolves are, in the same way it would prevent you normally.
+**Known Bug/Feature:** You can't directly place blocks where the wolves are, in the same way it would prevent you normally.
 
 ---
 
