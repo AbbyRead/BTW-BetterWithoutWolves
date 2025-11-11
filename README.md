@@ -114,11 +114,13 @@ This approach should work alongside most other mods. However, conflicts could ar
 ## License
 
 Released under the **0BSD** license.
-Free to use, copy, and modify — attribution appreciated but not required.
+
+You are completely free to use, copy, and modify it how you like.
 
 ---
 
 ## Credits
 
 Created by **Abigail Read**
+
 Special thanks to the BTW CE community for documentation and support!
