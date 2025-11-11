@@ -23,7 +23,7 @@ Some wolf-related stuff isn't even taken away at all:
 
 When this addon is active, wolves are:
 
-- ✓ **Invisible** - Cannot be seen by players (including the dire wolf's glowing eyes).
+- ✓ **Invisible** - Cannot be seen by players.
 - ✓ **Immobile** - Frozen in place, no AI or movement.
 - ✓ **Immortal** - Cannot take damage or die from any source.
 - ✓ **Incorporeal** - No collision, you walk right through them.
