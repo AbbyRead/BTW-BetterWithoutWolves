@@ -4,8 +4,9 @@
   "package": "btw.community.poopcats.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "EntityLivingBaseInvoker",
-    "EntityOcelotMixin"
+    "EntityOcelotMixin",
+    "access.EntityAccess",
+    "access.EntityLivingBaseAccess"
   ],
   "injectors": {
     "defaultRequire": 1
