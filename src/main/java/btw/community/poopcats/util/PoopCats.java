@@ -13,6 +13,8 @@ public class PoopCats {
 			new AddonSoundRegistryEntry("btw:entity.witch.death1", 1);
 	public static final AddonSoundRegistryEntry CAT_WARNING_SOUND =
 			new AddonSoundRegistryEntry("mob.cat.hiss", 1);
+	public static final AddonSoundRegistryEntry CAT_EXPLOSION_SOUND =
+			new AddonSoundRegistryEntry("random.explosion", 2);
 
 	// Game balance constants
 	//private static final int BASE_POOP_RATE = 6000; // 5 minutes
