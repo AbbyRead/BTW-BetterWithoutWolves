@@ -1,18 +1,18 @@
-package btw.community.betterwithoutwolves;
+package btw.community.poopcats;
 
 import btw.AddonHandler;
 import btw.BTWAddon;
 
-public class BetterWithoutWolvesAddon extends BTWAddon {
+public class PoopCatsAddon extends BTWAddon {
 
-	private static BetterWithoutWolvesAddon instance;
+	private static PoopCatsAddon instance;
 
-	public BetterWithoutWolvesAddon() {
+	public PoopCatsAddon() {
 		super();
 		instance = this;
 	}
 
-	public static BetterWithoutWolvesAddon getInstance() {
+	public static PoopCatsAddon getInstance() {
 		return instance;
 	}
 
