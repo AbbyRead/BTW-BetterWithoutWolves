@@ -12,42 +12,58 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityOcelot.class)
-// IMPLEMENTATION CHANGE: Implement the EntityAccessor interface
 public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, EntityAccess {
 
-	// Define a new, unused DataWatcher ID for our "fed" state
-	@Unique	private static final int POOP_DATA_WATCHER_ID = 30;
+
+	@Unique private static final int POOP_DATA_WATCHER_ID = 19;
+	@Unique private static final int WARNING_DATA_WATCHER_ID = 20;
+
+
+	// Constants for better maintainability
+	@Unique private static final float HEALING_AMOUNT = 5.0F;
+	@Unique private static final String NBT_FED_KEY = "IsCatFed";
+	@Unique private static final String NBT_WARNING_KEY = "PoopWarningTicks";
+	@Unique private static final int WARNING_DURATION = 100; // 5 seconds
 
 	@Inject(method = "getLivingSound", at = @At("HEAD"), cancellable = true)
-	private void cats$differentMeow(CallbackInfoReturnable<String> cir) {
-		// Example: replace normal meow with our custom scream
-		cir.setReturnValue(PoopCats.CAT_POOP.sound());
+	private void cats$silenceFedCat(CallbackInfoReturnable<String> cir) {
+		EntityOcelot cat = (EntityOcelot)(Object)this;
+
+		// If the cat is fed, prevent any sound at all
+		if (cats$isFed()) {
+			String sound = cat.isTamed() ? (cat.isInLove() ? "mob.cat.purr" : (cat.rand.nextInt(4) == 0 ? "mob.cat.purreow" : "mob.cat.purr")) : "";
+
+			cir.setReturnValue(sound);
+		}
+
+		// Otherwise, let vanilla logic handle the normal meow/purr
 	}
 
-	// Inject into entityInit to add our DataWatcher
 	@Inject(method = "entityInit", at = @At("TAIL"))
 	private void cats$addPoopDataWatcher(CallbackInfo ci) {
-		// CHANGE: Use the accessor method getDataWatcher()
 		getDataWatcher().addObject(POOP_DATA_WATCHER_ID, (byte) 0); // 0 = not fed, 1 = fed
+		getDataWatcher().addObject(WARNING_DATA_WATCHER_ID, 0); // Warning countdown timer
 	}
 
-	// Inject into NBT writing to save our "fed" state
 	@Inject(method = "writeEntityToNBT", at = @At("TAIL"))
 	private void cats$writePoopNBT(NBTTagCompound nbt, CallbackInfo ci) {
-		nbt.setBoolean("IsCatFed", cats$isFed());
+		nbt.setBoolean(NBT_FED_KEY, cats$isFed());
+		nbt.setInteger(NBT_WARNING_KEY, cats$getWarningTicks());
 	}
 
-	// Inject into NBT reading to load our "fed" state
 	@Inject(method = "readEntityFromNBT", at = @At("TAIL"))
 	private void cats$readPoopNBT(NBTTagCompound nbt, CallbackInfo ci) {
-		if (nbt.hasKey("IsCatFed")) {
-			cats$setIsFed(nbt.getBoolean("IsCatFed"));
+		if (nbt.hasKey(NBT_FED_KEY)) {
+			cats$setIsFed(nbt.getBoolean(NBT_FED_KEY));
+		}
+		if (nbt.hasKey(NBT_WARNING_KEY)) {
+			cats$setWarningTicks(nbt.getInteger(NBT_WARNING_KEY));
 		}
 	}
 
 	/**
 	 * Main pooping logic, called every tick.
-	 * Now only checks for pooping if the cat is actually "fed".
+	 * Handles both pooping checks and warning countdown.
 	 */
 	@Inject(method = "updateAITick", at = @At("TAIL"))
 	private void cats$updatePoopLogic(CallbackInfo ci) {
@@ -58,15 +74,32 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 			return;
 		}
 
+		// Handle warning countdown
+		int warningTicks = cats$getWarningTicks();
+		if (warningTicks > 0) {
+			cats$setWarningTicks(warningTicks - 1);
+
+			// Visual warning effects
+			if (warningTicks % 10 == 0) { // Every 0.5 seconds
+				cat.worldObj.spawnParticle("reddust",
+						cat.posX, cat.posY + 0.5, cat.posZ,
+						1.0, 0.0, 0.0);
+			}
+
+			// Check if warning expired - time to explode or check again
+			if (warningTicks == 0) {
+				PoopCats.handleWarningExpired(cat, cat.worldObj, cat.rotationYawHead, this);
+			}
+		}
+
 		// Only run the poop check IF the cat is fed
 		if (cats$isFed()) {
-			// Pass "this" (the mixin instance) to PoopCats so it can call us back
-			PoopCats.maybePoop(cat, cat.worldObj, cat.rotationYawHead, false, this);
+			PoopCats.maybePoop(cat, cat.worldObj, cat.rotationYawHead, this);
 		}
 	}
 
 	/**
-	 * This is the new feeding logic. It intercepts the "interact" call.
+	 * Feeding logic. Intercepts the interact call to handle feeding separately from breeding.
 	 */
 	@Inject(method = "interact", at = @At("HEAD"), cancellable = true)
 	private void cats$handleFeeding(EntityPlayer player, CallbackInfoReturnable<Boolean> cir) {
@@ -75,7 +108,8 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 
 		// Check if player is interacting with a tamed cat using fish
 		if (cat.isTamed() && stack != null && cat.isBreedingItem(stack)) {
-			// If the cat is NOT fed, we feed it.
+
+			// If the cat is NOT fed, we feed it
 			if (!cats$isFed()) {
 				// Consume the item (if not in creative)
 				if (!player.capabilities.isCreativeMode) {
@@ -87,37 +121,60 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 
 				// Set the cat's state to "fed"
 				cats$setIsFed(true);
-				// Heal the cat (like wolves) - 5.0F is 2.5 hearts
-				cat.heal(5.0F);
+
+				// Heal the cat
+				cat.heal(HEALING_AMOUNT);
 
 				// Play burp sound
 				cat.worldObj.playAuxSFX(BTWEffectManager.BURP_SOUND_EFFECT_ID,
-						MathHelper.floor_double(cat.posX), MathHelper.floor_double(cat.posY),
+						MathHelper.floor_double(cat.posX),
+						MathHelper.floor_double(cat.posY),
 						MathHelper.floor_double(cat.posZ), 0);
+
+				// Visual feedback - happy particles
+				for (int i = 0; i < 7; ++i) {
+					double px = cat.posX + (cat.worldObj.rand.nextDouble() - 0.5) * 0.5;
+					double py = cat.posY + cat.worldObj.rand.nextDouble() * 0.5 + 0.5;
+					double pz = cat.posZ + (cat.worldObj.rand.nextDouble() - 0.5) * 0.5;
+					cat.worldObj.spawnParticle("heart", px, py, pz, 0.0, 0.0, 0.0);
+				}
 
 				// Cancel the original interact call so breeding doesn't happen
 				cir.setReturnValue(true);
 				return;
 			}
-			// If the cat IS already fed, we do nothing.
-			// The inject will finish, and the original "interact" method will run,
-			// which will correctly trigger the breeding logic.
+
+			// If the cat IS already fed, let vanilla breeding logic handle it
+			// (both cats need to be in love mode from being fed fish)
 		}
 	}
 
-	// --- Helper methods for the DataWatcher and Interface ---
+	// --- Implementation of PoopCats.PoopCallback ---
 
-	// This is the implementation of PoopCats.PoopCallback
 	@Override
 	public void cats$setIsFed(boolean fed) {
-		// CHANGE: Use the accessor method getDataWatcher()
 		getDataWatcher().updateObject(POOP_DATA_WATCHER_ID, (byte) (fed ? 1 : 0));
 	}
 
-	// This is a helper to check the "fed" state
+	@Override
+	public void cats$setWarningTicks(int ticks) {
+		getDataWatcher().updateObject(WARNING_DATA_WATCHER_ID, ticks);
+	}
+
+	// --- Helper methods ---
+
 	@Unique
 	public boolean cats$isFed() {
-		// CHANGE: Use the accessor method getDataWatcher()
 		return getDataWatcher().getWatchableObjectByte(POOP_DATA_WATCHER_ID) == 1;
+	}
+
+	@Unique
+	public int cats$getWarningTicks() {
+		return getDataWatcher().getWatchableObjectInt(WARNING_DATA_WATCHER_ID);
+	}
+
+	@Unique
+	private static int cats$getWarningDuration() {
+		return WARNING_DURATION;
 	}
 }
