@@ -11,15 +11,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static btw.community.poopcats.util.PoopCats.POOP_STATE_ID;
+
 @Mixin(EntityOcelot.class)
 public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, EntityAccess {
-
 
 	@Unique private static final int POOP_DATA_WATCHER_ID = 19;
 	@Unique private static final int WARNING_DATA_WATCHER_ID = 20;
 
-
-	// Constants for better maintainability
 	@Unique private static final float HEALING_AMOUNT = 5.0F;
 	@Unique private static final String NBT_FED_KEY = "IsCatFed";
 	@Unique private static final String NBT_WARNING_KEY = "PoopWarningTicks";
@@ -29,10 +28,11 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 	private void cats$silenceFedCat(CallbackInfoReturnable<String> cir) {
 		EntityOcelot cat = (EntityOcelot)(Object)this;
 
-		// If the cat is fed, prevent any sound at all
 		if (cats$isFed()) {
-			String sound = cat.isTamed() ? (cat.isInLove() ? "mob.cat.purr" : (cat.rand.nextInt(4) == 0 ? "mob.cat.purreow" : "mob.cat.purr")) : "";
-
+			String sound = cat.isTamed()
+					? (cat.isInLove() ? "mob.cat.purr"
+					: (cat.rand.nextInt(4) == 0 ? "mob.cat.purreow" : "mob.cat.purr"))
+					: "";
 			cir.setReturnValue(sound);
 		}
 
@@ -74,33 +74,46 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 			return;
 		}
 
-		// Handle warning countdown
+		// --- Handle warning countdown (Creeper-style fuse) ---
 		int warningTicks = cats$getWarningTicks();
 		if (warningTicks > 0) {
-			cats$setWarningTicks(warningTicks - 1);
+			int nextTicks = warningTicks - 1;
+			cats$setWarningTicks(nextTicks);
 
-			// Visual warning effects
-			if (warningTicks % 10 == 0) { // Every 0.5 seconds
+			// Every 20 ticks (≈1s) hiss and flash, only for first 80 ticks
+			if (warningTicks % 20 == 0 && warningTicks > 20) {
+				// Visual fuse effect
+				cat.worldObj.spawnParticle("reddust",
+						cat.posX, cat.posY + 0.5, cat.posZ,
+						1.0, 0.0, 0.0);
+
+				// Continuous but spaced hiss
+				cat.worldObj.playSoundAtEntity(cat,
+						PoopCats.CAT_WARNING_SOUND.sound(),
+						1.0F, 0.8F);
+			}
+
+			// Last red blink right before explosion
+			if (nextTicks == 10) {
 				cat.worldObj.spawnParticle("reddust",
 						cat.posX, cat.posY + 0.5, cat.posZ,
 						1.0, 0.0, 0.0);
 			}
 
-			// Check if warning expired - time to explode or check again
-			if (warningTicks == 0) {
+			// Trigger explosion when timer finishes
+			if (nextTicks <= 0) {
 				PoopCats.handleWarningExpired(cat, cat.worldObj, cat.rotationYawHead, this);
+				return;
 			}
 		}
 
-		// Only run the poop check IF the cat is fed
+
+		// --- Regular poop logic if fed ---
 		if (cats$isFed()) {
 			PoopCats.maybePoop(cat, cat.worldObj, cat.rotationYawHead, this);
 		}
 	}
 
-	/**
-	 * Feeding logic. Intercepts the interact call to handle feeding separately from breeding.
-	 */
 	@Inject(method = "interact", at = @At("HEAD"), cancellable = true)
 	private void cats$handleFeeding(EntityPlayer player, CallbackInfoReturnable<Boolean> cir) {
 		EntityOcelot cat = (EntityOcelot)(Object)this;
@@ -153,15 +166,13 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 
 	@Override
 	public void cats$setIsFed(boolean fed) {
-		getDataWatcher().updateObject(POOP_DATA_WATCHER_ID, (byte) (fed ? 1 : 0));
+		getDataWatcher().updateObject(POOP_DATA_WATCHER_ID, (byte)(fed ? 1 : 0));
 	}
 
 	@Override
 	public void cats$setWarningTicks(int ticks) {
 		getDataWatcher().updateObject(WARNING_DATA_WATCHER_ID, ticks);
 	}
-
-	// --- Helper methods ---
 
 	@Unique
 	public boolean cats$isFed() {
@@ -177,4 +188,5 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 	private static int cats$getWarningDuration() {
 		return WARNING_DURATION;
 	}
+
 }

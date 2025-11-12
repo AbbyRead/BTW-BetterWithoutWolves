@@ -6,6 +6,8 @@
   "mixins": [
     "EntityAnimalMixin",
     "EntityOcelotMixin",
+    "EntityTameableMixin",
+    "EntityWolfMixin",
     "access.EntityAccess",
     "access.EntityLivingBaseAccess"
   ],

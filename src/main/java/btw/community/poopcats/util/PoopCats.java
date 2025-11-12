@@ -8,7 +8,6 @@ import net.minecraft.src.*;
 
 public class PoopCats {
 
-	// Sound constants
 	public static final AddonSoundRegistryEntry CAT_POOP_SOUND =
 			new AddonSoundRegistryEntry("btw:entity.witch.death1", 1);
 	public static final AddonSoundRegistryEntry CAT_WARNING_SOUND =
@@ -16,12 +15,12 @@ public class PoopCats {
 	public static final AddonSoundRegistryEntry CAT_EXPLOSION_SOUND =
 			new AddonSoundRegistryEntry("random.explosion", 2);
 
-	// Game balance constants
-	//private static final int BASE_POOP_RATE = 6000; // 5 minutes
-	private static final int BASE_POOP_RATE = 1200; // 1 minute
+	private static final int BASE_POOP_RATE = 60;
 	private static final int DARK_MULTIPLIER = 2;
-	private static final float EXPLOSION_POWER = 3.0F;
-	private static final int WARNING_DURATION = 100; // 5 seconds before explosion
+	private static final float EXPLOSION_POWER = 1.0F;
+	private static final int WARNING_DURATION = 100; // 5 seconds
+
+	public static final byte POOP_STATE_ID = 8; // arbitrary unique byte for poop event
 
 	/**
 	 * A callback interface that the EntityOcelotMixin implements.
@@ -42,18 +41,11 @@ public class PoopCats {
 	 * @param callback The mixin instance used to update the cat's state
 	 */
 	public static void maybePoop(EntityLiving entity, World world, float yawHead, PoopCallback callback) {
-		if (world.isRemote) {
-			return;
-		}
+		if (world.isRemote) return;
 
 		int chance = 1;
+		if (isDark(world, entity)) chance *= DARK_MULTIPLIER;
 
-		// Double chance in darkness
-		if (isDark(world, entity)) {
-			chance *= DARK_MULTIPLIER;
-		}
-
-		// More frequent pooping (5 minutes instead of 30)
 		if (world.rand.nextInt(BASE_POOP_RATE) < chance) {
 			handlePoopCheck(entity, world, yawHead, callback);
 		}
@@ -94,9 +86,7 @@ public class PoopCats {
 	 * Creates an explosion if still not on sand, or poops if now on sand.
 	 */
 	public static void handleWarningExpired(EntityLiving entity, World world, float yawHead, PoopCallback callback) {
-		if (world.isRemote) {
-			return;
-		}
+		if (world.isRemote) return; // safety guard
 
 		// Check one more time if they're on sand (player might have moved cat)
 		int i = MathHelper.floor_double(entity.posX);
@@ -181,17 +171,19 @@ public class PoopCats {
 	 * Spawns the dung item and plays pooping effects.
 	 */
 	private static void spawnPoop(EntityLiving entity, World world, float yawHead) {
+		if (world.isRemote) return; // server logic only
+
+		// SERVER-SIDE: tell clients to spawn particles
+		world.setEntityState(entity, POOP_STATE_ID);
+
+		// Server-side poop item + sound
 		float dx = MathHelper.sin(yawHead / 180.0f * (float)Math.PI);
 		float dz = -MathHelper.cos(yawHead / 180.0f * (float)Math.PI);
 		double x = entity.posX + dx;
 		double y = entity.posY + 0.25;
 		double z = entity.posZ + dz;
 
-		int i = MathHelper.floor_double(x);
-		int j = MathHelper.floor_double(y);
-		int k = MathHelper.floor_double(z);
-
-		if (!isBlockOpen(world, i, j, k)) return;
+		if (!isBlockOpen(world, MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z))) return;
 
 		EntityItem poop = new EntityItem(world, x, y, z, new ItemStack(BTWItems.dung));
 		float v = 0.05f;
@@ -205,14 +197,6 @@ public class PoopCats {
 		float vol = ((EntityLivingBaseAccess)entity).invokeGetSoundVolume();
 		world.playSoundAtEntity(entity, CAT_POOP_SOUND.sound(), vol * 8,
 				(world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F + 0.75F);
-
-		// Spawn poop particles
-		for (int n = 0; n < 5; ++n) {
-			double px = entity.posX + (dx * 0.5f) + world.rand.nextDouble() * 0.25;
-			double py = entity.posY + world.rand.nextDouble() * 0.5 + 0.25;
-			double pz = entity.posZ + (dz * 0.5f) + world.rand.nextDouble() * 0.25;
-			world.spawnParticle("smoke", px, py, pz, 0.0, 0.0, 0.0);
-		}
 	}
 
 	/**
