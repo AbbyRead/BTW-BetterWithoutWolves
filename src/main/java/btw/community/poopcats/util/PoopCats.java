@@ -3,9 +3,13 @@ package btw.community.poopcats.util;
 import btw.block.BTWBlocks;
 import btw.community.poopcats.mixin.access.EntityLivingBaseAccess;
 import btw.item.BTWItems;
+import btw.util.sounds.AddonSoundRegistryEntry;
 import net.minecraft.src.*;
 
 public class PoopCats {
+
+	public static final AddonSoundRegistryEntry CAT_POOP=
+			new AddonSoundRegistryEntry("btw:entity.witch.death1", 1);
 
 	/**
 	 * A callback interface that the EntityOcelotMixin implements.
@@ -108,8 +112,9 @@ public class PoopCats {
 		poop.delayBeforeCanPickup = 10;
 		world.spawnEntityInWorld(poop);
 
+		// Use the specific witch death1 sound for pooping
 		float vol = ((EntityLivingBaseAccess)entity).invokeGetSoundVolume();
-		world.playSoundAtEntity(entity, "mob.witch.death1", vol, (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F + 0.5F);
+		world.playSoundAtEntity(entity, CAT_POOP.sound(), vol, (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F + 0.5F);
 
 		for (int n = 0; n < 5; ++n) {
 			double px = entity.posX + (dx * 0.5f) + world.rand.nextDouble() * 0.25;

@@ -19,14 +19,9 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, Entity
 	@Unique	private static final int POOP_DATA_WATCHER_ID = 30;
 
 	@Inject(method = "getLivingSound", at = @At("HEAD"), cancellable = true)
-	private void cats$noMeow(CallbackInfoReturnable<String> cir) {
-		String soundToReturn;
-		EntityOcelot cat = (EntityOcelot) (Object) this;
-		soundToReturn = cat.isTamed() ? (cat.isInLove() ? "mob.cat.purr" : (cat.rand.nextInt(4) == 0 ? "mob.witch.death1" : "mob.cat.purr")) : "";
-		if (soundToReturn.equals("mob.witch.death1")) {
-			// Something to play that specific sound
-		}
-		cir.setReturnValue(soundToReturn);
+	private void cats$differentMeow(CallbackInfoReturnable<String> cir) {
+		// Example: replace normal meow with our custom scream
+		cir.setReturnValue(PoopCats.CAT_POOP.sound());
 	}
 
 	// Inject into entityInit to add our DataWatcher
