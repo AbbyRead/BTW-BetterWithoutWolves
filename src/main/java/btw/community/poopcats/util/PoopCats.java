@@ -28,6 +28,7 @@ public class PoopCats {
 	public interface PoopCallback {
 		void cats$setIsFed(boolean fed);
 		void cats$setWarningTicks(int ticks);
+		int cats$getWarningTicks();
 	}
 
 	public static void maybePoop(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {

@@ -2,7 +2,9 @@ package btw.community.poopcats.mixin;
 
 import btw.client.fx.BTWEffectManager;
 import btw.community.poopcats.mixin.access.EntityAccess;
+import btw.community.poopcats.mixin.access.EntityLivingAccess;
 import btw.community.poopcats.util.CatParticleHandler;
+import btw.community.poopcats.util.EntityAIOcelotSwell;
 import btw.community.poopcats.util.PoopCats;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,6 +25,13 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 	@Unique private static final float HEALING_AMOUNT = 5.0F;
 	@Unique private static final String NBT_FED_KEY = "IsCatFed";
 	@Unique private static final String NBT_WARNING_KEY = "PoopWarningTicks";
+
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void cats$addWarningAI(CallbackInfo ci) {
+		EntityOcelot cat = (EntityOcelot)(Object)this;
+		EntityLivingAccess access = (EntityLivingAccess) cat;
+		access.getTasks().addTask(3, new EntityAIOcelotSwell(cat, 6.0D)); // 6 blocks warning radius
+	}
 
 	@Inject(method = "getLivingSound", at = @At("HEAD"), cancellable = true)
 	private void cats$silenceFedCat(CallbackInfoReturnable<String> cir) {

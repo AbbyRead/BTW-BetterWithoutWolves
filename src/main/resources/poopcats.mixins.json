@@ -5,11 +5,12 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "EntityOcelot_EntityAnimalMixin",
-    "EntityWolf_EntityMixin",
-    "EntityOcelotMixin",
     "EntityOcelot_EntityTameableMixin",
+    "EntityOcelotMixin",
+    "EntityWolf_EntityMixin",
     "EntityWolfMixin",
     "access.EntityAccess",
+    "access.EntityLivingAccess",
     "access.EntityLivingBaseAccess"
   ],
   "injectors": {
