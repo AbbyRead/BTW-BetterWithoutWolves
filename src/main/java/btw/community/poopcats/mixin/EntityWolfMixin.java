@@ -28,7 +28,7 @@ public class EntityWolfMixin {
 
 /*
 	// ------------------------------------
-	// 💩 Inject into updateShitState — triggers poop event
+	// Trigger poop event frequently and unconditionally
 	// ------------------------------------
 	@Inject(method = "updateShitState", at = @At("HEAD"), cancellable = true)
 	private void makeShit(CallbackInfo ci) {
@@ -41,7 +41,7 @@ public class EntityWolfMixin {
 */
 
 	// ------------------------------------
-	// 💨 Client-side poop particle effect
+	// Client-side poop particle effect
 	// ------------------------------------
 	@Unique
 	@Environment(EnvType.CLIENT)
@@ -90,7 +90,7 @@ public class EntityWolfMixin {
 	}
 
 	// ------------------------------------
-	// 🛰 Handle packet-triggered state updates
+	// Handle packet-triggered state updates
 	// ------------------------------------
 	@Inject(method = "handleHealthUpdate", at = @At("HEAD"))
 	private void onHandleHealthUpdate(byte id, CallbackInfo ci) {
@@ -100,7 +100,7 @@ public class EntityWolfMixin {
 	}
 
 	// ------------------------------------
-	// 🧩 Replace head-based poop vector with body yaw
+	// Replace head-based poop vector with body yaw
 	// ------------------------------------
 	@ModifyExpressionValue(
 			method = "attemptToShit",

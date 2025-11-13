@@ -4,6 +4,8 @@ import btw.block.BTWBlocks;
 import btw.community.poopcats.mixin.access.EntityLivingBaseAccess;
 import btw.item.BTWItems;
 import btw.util.sounds.AddonSoundRegistryEntry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
 
 public class PoopCats {
@@ -18,49 +20,28 @@ public class PoopCats {
 	private static final int BASE_POOP_RATE = 60;
 	private static final int DARK_MULTIPLIER = 2;
 	private static final float EXPLOSION_POWER = 1.0F;
-	private static final int WARNING_DURATION = 100; // 5 seconds
+	private static final int WARNING_DURATION = 100;
 
-	public static final byte POOP_STATE_ID = 8; // arbitrary unique byte for poop event
+	public static final byte POOP_PARTICLE_ID = 9;
+	public static final byte SYNC_YAW_BEFORE_POOP = 21;
 
-	/**
-	 * A callback interface that the EntityOcelotMixin implements.
-	 * This allows our static utility class to interact with the cat's state.
-	 */
 	public interface PoopCallback {
 		void cats$setIsFed(boolean fed);
 		void cats$setWarningTicks(int ticks);
 	}
 
-	/**
-	 * Main poop checking method, only called when cat is fed.
-	 * Now with more reasonable frequency.
-	 *
-	 * @param entity The cat entity
-	 * @param world The world
-	 * @param yawHead The cat's head rotation
-	 * @param callback The mixin instance used to update the cat's state
-	 */
-	public static void maybePoop(EntityLiving entity, World world, float yawHead, PoopCallback callback) {
+	public static void maybePoop(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
 		if (world.isRemote) return;
 
 		int chance = 1;
 		if (isDark(world, entity)) chance *= DARK_MULTIPLIER;
 
 		if (world.rand.nextInt(BASE_POOP_RATE) < chance) {
-			handlePoopCheck(entity, world, yawHead, callback);
+			handlePoopCheck(entity, world, yawOffset, callback);
 		}
 	}
 
-	/**
-	 * Checks the block under the entity and decides whether to poop, warn, or explode.
-	 *
-	 * @param entity The cat entity
-	 * @param world The world
-	 * @param yawHead The cat's head rotation
-	 * @param callback The callback used to update the cat's state
-	 */
-	private static void handlePoopCheck(EntityLiving entity, World world, float yawHead, PoopCallback callback) {
-		// Get the block directly under the cat's feet
+	private static void handlePoopCheck(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
 		int i = MathHelper.floor_double(entity.posX);
 		int j = MathHelper.floor_double(entity.posY) - 1;
 		int k = MathHelper.floor_double(entity.posZ);
@@ -68,99 +49,45 @@ public class PoopCats {
 		int blockIdBelow = world.getBlockId(i, j, k);
 
 		if (blockIdBelow == Block.sand.blockID) {
-			// Safe! Poop normally.
-			spawnPoop(entity, world, yawHead);
-			// After pooping, reset the fed status
+			spawnPoop(entity, world, yawOffset);
 			callback.cats$setIsFed(false);
 			callback.cats$setWarningTicks(0);
 		} else {
-			// Not on sand! Check if we're already in warning state
-			// We need to get the warning ticks from somewhere - the callback should provide a getter
-			// For now, we'll start the warning
 			startWarning(entity, world, callback);
-
 		}
 	}
 
-	/**
-	 * Called when warning timer reaches zero from the mixin.
-	 * Creates an explosion if still not on sand, or poops if now on sand.
-	 */
-	public static void handleWarningExpired(EntityLiving entity, World world, float yawHead, PoopCallback callback) {
-		if (world.isRemote) return; // safety guard
+	public static void handleWarningExpired(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
+		if (world.isRemote) return;
 
-		// Check one more time if they're on sand (player might have moved cat)
 		int i = MathHelper.floor_double(entity.posX);
 		int j = MathHelper.floor_double(entity.posY) - 1;
 		int k = MathHelper.floor_double(entity.posZ);
 		int blockIdBelow = world.getBlockId(i, j, k);
 
 		if (blockIdBelow == Block.sand.blockID) {
-			// Player saved the cat! Just poop normally
-			spawnPoop(entity, world, yawHead);
+			spawnPoop(entity, world, yawOffset);
 			callback.cats$setIsFed(false);
 			callback.cats$setWarningTicks(0);
 		} else {
-			// Still not on sand - KABOOM!
 			world.createExplosion(entity, entity.posX, entity.posY, entity.posZ,
 					EXPLOSION_POWER, true);
 			entity.setDead();
 		}
 	}
 
-	/**
-	 * Starts the warning phase before explosion.
-	 * Gives the player a chance to move the cat to safety.
-	 */
 	private static void startWarning(EntityLiving entity, World world, PoopCallback callback) {
-		// Set warning ticks - we need to expose this value
-		// Using reflection or a getter through callback
 		callback.cats$setWarningTicks(WARNING_DURATION);
-
-		// Play warning sound
 		world.playSoundAtEntity(entity, CAT_WARNING_SOUND.sound(), 1.0F, 0.8F);
 
-		// do something with setScale
-
-		// Spawn warning particles
 		for (int n = 0; n < 10; ++n) {
 			double px = entity.posX + (world.rand.nextDouble() - 0.5) * 0.5;
 			double py = entity.posY + world.rand.nextDouble() * 0.5 + 0.25;
 			double pz = entity.posZ + (world.rand.nextDouble() - 0.5) * 0.5;
 			world.spawnParticle("reddust", px, py, pz, 1.0, 0.0, 0.0);
 		}
-
-		// Schedule explosion check for later
-		// The mixin will handle counting down and calling explode when ready
 	}
 
-	/**
-	 * Called when warning timer reaches zero.
-	 * Creates an explosion and removes the cat.
-	 */
-	public static void explode(EntityLiving entity, World world) {
-		if (!world.isRemote) {
-			// Check one more time if they're on sand (player might have moved cat)
-			int i = MathHelper.floor_double(entity.posX);
-			int j = MathHelper.floor_double(entity.posY) - 1;
-			int k = MathHelper.floor_double(entity.posZ);
-			int blockIdBelow = world.getBlockId(i, j, k);
-
-			if (blockIdBelow == Block.sand.blockID) {
-				// Player saved the cat! Just poop normally
-				return;
-			}
-
-			// Still not on sand - KABOOM!
-			world.createExplosion(entity, entity.posX, entity.posY, entity.posZ,
-					EXPLOSION_POWER, true);
-			entity.setDead();
-		}
-	}
-
-	/**
-	 * Checks if the entity is in darkness (light level < 8).
-	 */
 	private static boolean isDark(World world, Entity entity) {
 		int light = world.getBlockLightValue(
 				MathHelper.floor_double(entity.posX),
@@ -170,18 +97,16 @@ public class PoopCats {
 		return light < 8;
 	}
 
-	/**
-	 * Spawns the dung item and plays pooping effects.
-	 */
-	private static void spawnPoop(EntityLiving entity, World world, float yawHead) {
-		if (world.isRemote) return; // server logic only
+	private static void spawnPoop(EntityLiving entity, World world, float yawOffset) {
+		if (world.isRemote) return;
 
-		// SERVER-SIDE: tell clients to spawn particles
-		world.setEntityState(entity, POOP_STATE_ID);
+		// Tell clients to spawn particles
+		world.setEntityState(entity, POOP_PARTICLE_ID);
+		world.setEntityState(entity, SYNC_YAW_BEFORE_POOP);
 
-		// Server-side poop item + sound
-		float dx = MathHelper.sin(yawHead / 180.0f * (float)Math.PI);
-		float dz = -MathHelper.cos(yawHead / 180.0f * (float)Math.PI);
+		// Server-side: spawn poop item
+		float dx = MathHelper.sin(yawOffset / 180.0f * (float)Math.PI);
+		float dz = -MathHelper.cos(yawOffset / 180.0f * (float)Math.PI);
 		double x = entity.posX + dx;
 		double y = entity.posY + 0.25;
 		double z = entity.posZ + dz;
@@ -196,15 +121,11 @@ public class PoopCats {
 		poop.delayBeforeCanPickup = 10;
 		world.spawnEntityInWorld(poop);
 
-		// Play pooping sound
 		float vol = ((EntityLivingBaseAccess)entity).invokeGetSoundVolume();
 		world.playSoundAtEntity(entity, CAT_POOP_SOUND.sound(), vol * 8,
 				(world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F + 0.75F);
 	}
 
-	/**
-	 * Checks if a block position is open for dropping items.
-	 */
 	private static boolean isBlockOpen(World world, int i, int j, int k) {
 		Block block = Block.blocksList[world.getBlockId(i, j, k)];
 		if (block != null && (block == Block.waterMoving || block == Block.waterStill ||
@@ -216,4 +137,47 @@ public class PoopCats {
 		}
 		return block == null;
 	}
+
+
+	@Environment(EnvType.CLIENT)
+	public static void handlePoopParticles(EntityOcelot cat) {
+
+		float poopVectorX = MathHelper.sin(cat.renderYawOffset / 180.0F * (float)Math.PI);
+		float poopVectorZ = -MathHelper.cos(cat.renderYawOffset / 180.0F * (float)Math.PI);
+		double baseX = cat.posX + poopVectorX;
+		double baseY = cat.posY + 0.25;
+		double baseZ = cat.posZ + poopVectorZ;
+
+		EntityFX mainParticle = new EntitySmokeFX(
+				cat.worldObj,
+				baseX + cat.worldObj.rand.nextDouble() * 0.25 - 0.125,
+				baseY + cat.worldObj.rand.nextDouble() * 0.5,
+				baseZ + cat.worldObj.rand.nextDouble() * 0.25 - 0.125,
+				0, 0, 0,
+				0.33f
+		);
+		mainParticle.setRBGColorF(0.4f + cat.rand.nextFloat() * 0.1f, 0.25f + cat.rand.nextFloat() * 0.05f, 0.1f + cat.rand.nextFloat() * 0.05f);
+		Minecraft.getMinecraft().effectRenderer.addEffect(mainParticle);
+
+		for (int n = 0; n < 7; ++n) {
+			double offsetX = (cat.rand.nextDouble() - 0.5) * 0.5;
+			double offsetY = cat.rand.nextDouble() * 0.5 + 0.25;
+			double offsetZ = (cat.rand.nextDouble() - 0.5) * 0.5;
+
+			EntityFX particle = new EntitySmokeFX(
+					cat.worldObj,
+					baseX + offsetX,
+					baseY + offsetY,
+					baseZ + offsetZ,
+					cat.rand.nextGaussian() * 0.02,
+					cat.rand.nextGaussian() * 0.02,
+					cat.rand.nextGaussian() * 0.02,
+					0.33f
+			);
+
+			particle.setRBGColorF(0.4f + cat.rand.nextFloat() * 0.1f, 0.25f + cat.rand.nextFloat() * 0.05f, 0.1f + cat.rand.nextFloat() * 0.05f);
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+		}
+	}
+
 }

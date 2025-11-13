@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityAnimal.class)
-public abstract class EntityAnimalMixin {
+public abstract class EntityOcelot_EntityAnimalMixin {
 
 	/**
 	 * Clear fed state when any animal dies.

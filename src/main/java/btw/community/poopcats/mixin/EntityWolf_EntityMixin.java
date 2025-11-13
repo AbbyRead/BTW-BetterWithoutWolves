@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
 @Mixin(Entity.class)
-public class EntityMixin {
+public class EntityWolf_EntityMixin {
 	@Unique
 	private static final byte SYNC_YAW_BEFORE_POOP = 10;
 

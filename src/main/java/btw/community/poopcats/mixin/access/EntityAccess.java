@@ -9,7 +9,4 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EntityAccess {
 	@Accessor("dataWatcher")
 	DataWatcher getDataWatcher();
-
-	@Accessor("rotationYaw")
-	float getRotationYaw();
 }
