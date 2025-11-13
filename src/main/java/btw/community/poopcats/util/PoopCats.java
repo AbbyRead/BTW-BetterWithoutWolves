@@ -20,7 +20,7 @@ public class PoopCats {
 	private static final int BASE_POOP_RATE = 60;
 	private static final int DARK_MULTIPLIER = 2;
 	private static final float EXPLOSION_POWER = 1.0F;
-	private static final int WARNING_DURATION = 80;
+	private static final int WARNING_DURATION = 100;
 
 	public static final byte POOP_PARTICLE_ID = 9;
 	public static final byte SYNC_YAW_BEFORE_POOP = 21;
@@ -99,8 +99,6 @@ public class PoopCats {
 		if (!world.isRemote) {
 			// Server tells clients to spawn particles
 			world.setEntityState(entity, (byte)35); // Custom particle event ID
-
-
 		}
 	}
 
@@ -215,42 +213,69 @@ public class PoopCats {
 	@Environment(EnvType.CLIENT)
 	public static void handleExplosionParticles(EntityOcelot cat) {
 		World world = cat.worldObj;
+		Minecraft mc = Minecraft.getMinecraft();
 
-		// Spawn standard "poof" particles
-		for (int i = 0; i < 20; ++i) {
-			double motionX = world.rand.nextGaussian() * 0.02D;
-			double motionY = world.rand.nextGaussian() * 0.02D + 0.2D;
-			double motionZ = world.rand.nextGaussian() * 0.02D;
-			world.spawnParticle("explode",
-					cat.posX + (world.rand.nextFloat() - 0.5D) * (double)cat.width,
-					cat.posY + (double)world.rand.nextFloat() * (double)cat.height,
-					cat.posZ + (world.rand.nextFloat() - 0.5D) * (double)cat.width,
-					motionX, motionY, motionZ);
+		// --- Globs (using EntityDropParticleFX) ---
+		int globCount = 30; // Number of blood globs
+		float bloodRed = 0.5F;
+		float bloodGreen = 0.0F;
+		float bloodBlue = 0.0F;
+
+		for (int i = 0; i < globCount; ++i) {
+			double motionX = (world.rand.nextDouble() - 0.5D) * 1.0D; // Stronger horizontal motion
+			double motionY = world.rand.nextDouble() * 0.5D + 0.5D; // Upward motion
+			double motionZ = (world.rand.nextDouble() - 0.5D) * 1.0D;
+
+			// Use the custom constructor from EntityDropParticleFX
+			// We pass Material.lava so the particle "splats" on the ground
+			EntityFX glob = new EntityDropParticleFX(
+					world,
+					cat.posX,
+					cat.posY + 0.5D, // Start from center of cat
+					cat.posZ,
+					Material.lava, // Use lava material to "splat" on ground
+					0,             // bobTimer = 0, so it flies immediately
+					bloodRed,
+					bloodGreen,
+					bloodBlue,
+					1.0F           // alpha
+			);
+
+			// The default constructor sets motion to 0, so we override it
+			glob.motionX = motionX;
+			glob.motionY = motionY;
+			glob.motionZ = motionZ;
+
+			mc.effectRenderer.addEffect(glob);
 		}
 
-		// Spawn red "blood" particles
-		for (int i = 0; i < 30; i++) {
-			double offsetX = (world.rand.nextDouble() - 0.5D) * 2.0D;
-			double offsetY = world.rand.nextDouble() * 1.5D;
-			double offsetZ = (world.rand.nextDouble() - 0.5D) * 2.0D;
-			// Use reddust particle with full red color
-			world.spawnParticle("reddust",
-					cat.posX + offsetX,
-					cat.posY + offsetY,
-					cat.posZ + offsetZ,
-					0.5, 0.0, 0.0); // R, G, B
-		}
+		// --- Spray/Mist (using EntityReddustFX) ---
+		int sprayCount = 50;
 
-		for (int i = 0; i < 10; i++) {
-			double offsetX = (world.rand.nextDouble() - 0.5D) * 1.5D;
-			double offsetY = world.rand.nextDouble();
-			double offsetZ = (world.rand.nextDouble() - 0.5D) * 1.5D;
+		for (int i = 0; i < sprayCount; i++) {
+			double posX = cat.posX + (world.rand.nextDouble() - 0.5D) * (double)cat.width;
+			double posY = cat.posY + world.rand.nextDouble() * (double)cat.height;
+			double posZ = cat.posZ + (world.rand.nextDouble() - 0.5D) * (double)cat.width;
 
-			world.spawnParticle("smoke",
-					cat.posX + offsetX,
-					cat.posY + offsetY,
-					cat.posZ + offsetZ,
-					0.3, 0.0, 0.0);
+			// Use reddust particle with red color
+			// EntityReddustFX(World, x, y, z, scale, R, G, B)
+			EntityFX spray = new EntityReddustFX(
+					world,
+					posX,
+					posY,
+					posZ,
+					1.0F,  // Scale
+					1.0F,  // R (this is a multiplier, so use 1.0 for full red)
+					0.0F,  // G
+					0.0F   // B
+			);
+
+			// Give it some outward velocity
+			spray.motionX = (world.rand.nextDouble() - 0.5D) * 0.5D;
+			spray.motionY = world.rand.nextDouble() * 0.5D;
+			spray.motionZ = (world.rand.nextDouble() - 0.5D) * 0.5D;
+
+			mc.effectRenderer.addEffect(spray);
 		}
 	}
 
