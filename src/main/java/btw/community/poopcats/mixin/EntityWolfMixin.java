@@ -98,6 +98,7 @@ public class EntityWolfMixin {
 			this.handlePoopParticles();
 		}
 	}
+
 	// ------------------------------------
 	// 🧩 Replace head-based poop vector with body yaw
 	// ------------------------------------
