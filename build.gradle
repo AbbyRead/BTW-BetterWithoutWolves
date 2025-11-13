@@ -78,6 +78,9 @@ dependencies {
 	implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.12'
 
 	compileOnly 'javax.inject:javax.inject:1'
+
+	// MixinExtras
+	include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0")))
 }
 
 

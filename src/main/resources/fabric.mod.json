@@ -27,7 +27,7 @@
     "poopcats.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.19",
+    "fabricloader": ">=0.14.25",
     "minecraft": "1.6.4"
   }
 }

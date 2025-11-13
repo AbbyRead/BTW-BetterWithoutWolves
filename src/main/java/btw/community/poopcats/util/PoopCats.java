@@ -78,6 +78,7 @@ public class PoopCats {
 			// We need to get the warning ticks from somewhere - the callback should provide a getter
 			// For now, we'll start the warning
 			startWarning(entity, world, callback);
+
 		}
 	}
 
@@ -118,6 +119,8 @@ public class PoopCats {
 
 		// Play warning sound
 		world.playSoundAtEntity(entity, CAT_WARNING_SOUND.sound(), 1.0F, 0.8F);
+
+		// do something with setScale
 
 		// Spawn warning particles
 		for (int n = 0; n < 10; ++n) {
