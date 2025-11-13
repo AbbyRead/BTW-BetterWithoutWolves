@@ -28,6 +28,8 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 	@Unique private static final String NBT_FED_KEY = "IsCatFed";
 	@Unique private static final String NBT_WARNING_KEY = "PoopWarningTicks";
 
+	@Unique private int lastSwellTime; // NEW: For render interpolation
+
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void cats$addWarningAI(CallbackInfo ci) {
 		EntityOcelot cat = (EntityOcelot)(Object)this;
@@ -72,13 +74,19 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 			cats$setWarningTicks(nbt.getInteger(NBT_WARNING_KEY));
 		}
 		if (nbt.hasKey("SwellTime")) {
-			cats$setSwellTime(nbt.getInteger("SwellTime")); // NEW
+			// NEW: Read swell time and sync lastSwellTime
+			int swellTime = nbt.getInteger("SwellTime");
+			cats$setSwellTime(swellTime);
+			this.lastSwellTime = swellTime;
 		}
 	}
 
 	@Inject(method = "updateAITick", at = @At("TAIL"))
 	private void cats$updatePoopLogic(CallbackInfo ci) {
 		EntityOcelot cat = (EntityOcelot)(Object)this;
+
+		// NEW: Store last swell time for interpolation
+		this.lastSwellTime = cats$getSwellTime();
 
 		if (!cat.isTamed()) {
 			return;
@@ -229,6 +237,12 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 	@Unique
 	public int cats$getSwellTime() {
 		return getDataWatcher().getWatchableObjectInt(SWELL_DATA_WATCHER_ID);
+	}
+
+	// NEW: Add accessor for lastSwellTime
+	@Unique
+	public int cats$getLastSwellTime() {
+		return this.lastSwellTime;
 	}
 
 	@Unique

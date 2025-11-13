@@ -35,8 +35,7 @@ public abstract class EntityOcelot_EntityTameableMixin {
 				PoopCats.handlePoopParticles(cat);
 			} else if (id == EXPLOSION_PARTICLE_ID && self.worldObj.isRemote) {
 				// NEW: Handle explosion particles
-				// Doesn't exist yet:
-				// PoopCats.handleExplosionParticles(cat);
+				PoopCats.handleExplosionParticles(cat);
 			}
 		}
 	}

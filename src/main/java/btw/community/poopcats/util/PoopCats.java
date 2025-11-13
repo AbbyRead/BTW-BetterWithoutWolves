@@ -20,7 +20,7 @@ public class PoopCats {
 	private static final int BASE_POOP_RATE = 60;
 	private static final int DARK_MULTIPLIER = 2;
 	private static final float EXPLOSION_POWER = 1.0F;
-	private static final int WARNING_DURATION = 100;
+	private static final int WARNING_DURATION = 80;
 
 	public static final byte POOP_PARTICLE_ID = 9;
 	public static final byte SYNC_YAW_BEFORE_POOP = 21;
@@ -29,6 +29,9 @@ public class PoopCats {
 		void cats$setIsFed(boolean fed);
 		void cats$setWarningTicks(int ticks);
 		int cats$getWarningTicks();
+		// NEW: Add accessors for swell time interpolation
+		int cats$getSwellTime();
+		int cats$getLastSwellTime();
 	}
 
 	public static void maybePoop(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
@@ -97,31 +100,7 @@ public class PoopCats {
 			// Server tells clients to spawn particles
 			world.setEntityState(entity, (byte)35); // Custom particle event ID
 
-			// Also spawn some server-side for immediate effect
-			for (int i = 0; i < 20; i++) {
-				double offsetX = (world.rand.nextDouble() - 0.5D) * 2.0D;
-				double offsetY = world.rand.nextDouble() * 1.5D;
-				double offsetZ = (world.rand.nextDouble() - 0.5D) * 2.0D;
 
-				world.spawnParticle("reddust",
-						entity.posX + offsetX,
-						entity.posY + offsetY,
-						entity.posZ + offsetZ,
-						1.0, 0.0, 0.0); // Red color
-			}
-
-			// Add some "lava" particles for extra effect
-			for (int i = 0; i < 10; i++) {
-				double offsetX = (world.rand.nextDouble() - 0.5D) * 1.5D;
-				double offsetY = world.rand.nextDouble();
-				double offsetZ = (world.rand.nextDouble() - 0.5D) * 1.5D;
-
-				world.spawnParticle("lava",
-						entity.posX + offsetX,
-						entity.posY + offsetY,
-						entity.posZ + offsetZ,
-						0.0, 0.0, 0.0);
-			}
 		}
 	}
 
@@ -227,6 +206,51 @@ public class PoopCats {
 
 			particle.setRBGColorF(0.4f + cat.rand.nextFloat() * 0.1f, 0.25f + cat.rand.nextFloat() * 0.05f, 0.1f + cat.rand.nextFloat() * 0.05f);
 			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+		}
+	}
+
+	/**
+	 * NEW: Client-side particle handler for the explosion
+	 */
+	@Environment(EnvType.CLIENT)
+	public static void handleExplosionParticles(EntityOcelot cat) {
+		World world = cat.worldObj;
+
+		// Spawn standard "poof" particles
+		for (int i = 0; i < 20; ++i) {
+			double motionX = world.rand.nextGaussian() * 0.02D;
+			double motionY = world.rand.nextGaussian() * 0.02D + 0.2D;
+			double motionZ = world.rand.nextGaussian() * 0.02D;
+			world.spawnParticle("explode",
+					cat.posX + (world.rand.nextFloat() - 0.5D) * (double)cat.width,
+					cat.posY + (double)world.rand.nextFloat() * (double)cat.height,
+					cat.posZ + (world.rand.nextFloat() - 0.5D) * (double)cat.width,
+					motionX, motionY, motionZ);
+		}
+
+		// Spawn red "blood" particles
+		for (int i = 0; i < 30; i++) {
+			double offsetX = (world.rand.nextDouble() - 0.5D) * 2.0D;
+			double offsetY = world.rand.nextDouble() * 1.5D;
+			double offsetZ = (world.rand.nextDouble() - 0.5D) * 2.0D;
+			// Use reddust particle with full red color
+			world.spawnParticle("reddust",
+					cat.posX + offsetX,
+					cat.posY + offsetY,
+					cat.posZ + offsetZ,
+					0.5, 0.0, 0.0); // R, G, B
+		}
+
+		for (int i = 0; i < 10; i++) {
+			double offsetX = (world.rand.nextDouble() - 0.5D) * 1.5D;
+			double offsetY = world.rand.nextDouble();
+			double offsetZ = (world.rand.nextDouble() - 0.5D) * 1.5D;
+
+			world.spawnParticle("smoke",
+					cat.posX + offsetX,
+					cat.posY + offsetY,
+					cat.posZ + offsetZ,
+					0.3, 0.0, 0.0);
 		}
 	}
 
