@@ -7,8 +7,7 @@
     "EntityOcelot_EntityAnimalMixin",
     "EntityOcelot_EntityTameableMixin",
     "EntityOcelotMixin",
-    "EntityWolf_EntityMixin",
-    "EntityWolfMixin",
+    "RenderOcelotMixin",
     "access.EntityAccess",
     "access.EntityLivingAccess",
     "access.EntityLivingBaseAccess"

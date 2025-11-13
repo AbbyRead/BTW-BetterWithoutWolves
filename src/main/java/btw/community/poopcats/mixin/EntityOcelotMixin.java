@@ -4,6 +4,7 @@ import btw.client.fx.BTWEffectManager;
 import btw.community.poopcats.mixin.access.EntityAccess;
 import btw.community.poopcats.mixin.access.EntityLivingAccess;
 import btw.community.poopcats.util.CatParticleHandler;
+import btw.community.poopcats.util.EntityAIOcelotSeekSand;
 import btw.community.poopcats.util.EntityAIOcelotSwell;
 import btw.community.poopcats.util.PoopCats;
 import net.fabricmc.api.EnvType;
@@ -19,8 +20,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(EntityOcelot.class)
 public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatParticleHandler, EntityAccess {
 
-	@Unique private static final byte POOP_WATCH_ID = 27;
+	@Unique private static final byte POOP_DATA_WATCHER_ID = 27;
 	@Unique private static final byte WARNING_DATA_WATCHER_ID = 20;
+	@Unique private static final byte SWELL_DATA_WATCHER_ID = 24;
 
 	@Unique private static final float HEALING_AMOUNT = 5.0F;
 	@Unique private static final String NBT_FED_KEY = "IsCatFed";
@@ -30,7 +32,8 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 	private void cats$addWarningAI(CallbackInfo ci) {
 		EntityOcelot cat = (EntityOcelot)(Object)this;
 		EntityLivingAccess access = (EntityLivingAccess) cat;
-		access.getTasks().addTask(3, new EntityAIOcelotSwell(cat, 6.0D)); // 6 blocks warning radius
+		access.getTasks().addTask(2, new EntityAIOcelotSeekSand(cat, 1.2D)); // Higher priority, faster speed
+		access.getTasks().addTask(3, new EntityAIOcelotSwell(cat, 6.0D));
 	}
 
 	@Inject(method = "getLivingSound", at = @At("HEAD"), cancellable = true)
@@ -48,14 +51,16 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 
 	@Inject(method = "entityInit", at = @At("TAIL"))
 	private void cats$addPoopDataWatcher(CallbackInfo ci) {
-		getDataWatcher().addObject(POOP_WATCH_ID, (byte) 0);
+		getDataWatcher().addObject(POOP_DATA_WATCHER_ID, (byte) 0);
 		getDataWatcher().addObject(WARNING_DATA_WATCHER_ID, 0);
+		getDataWatcher().addObject(SWELL_DATA_WATCHER_ID, 0); // NEW: Swell time
 	}
 
 	@Inject(method = "writeEntityToNBT", at = @At("TAIL"))
 	private void cats$writePoopNBT(NBTTagCompound nbt, CallbackInfo ci) {
 		nbt.setBoolean(NBT_FED_KEY, cats$isFed());
 		nbt.setInteger(NBT_WARNING_KEY, cats$getWarningTicks());
+		nbt.setInteger("SwellTime", cats$getSwellTime()); // NEW
 	}
 
 	@Inject(method = "readEntityFromNBT", at = @At("TAIL"))
@@ -65,6 +70,9 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 		}
 		if (nbt.hasKey(NBT_WARNING_KEY)) {
 			cats$setWarningTicks(nbt.getInteger(NBT_WARNING_KEY));
+		}
+		if (nbt.hasKey("SwellTime")) {
+			cats$setSwellTime(nbt.getInteger("SwellTime")); // NEW
 		}
 	}
 
@@ -80,6 +88,11 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 		if (warningTicks > 0) {
 			int nextTicks = warningTicks - 1;
 			cats$setWarningTicks(nextTicks);
+
+			// NEW: Increase swell as warning progresses
+			int maxSwell = 30;
+			int swellTime = maxSwell - (nextTicks * maxSwell / 100);
+			cats$setSwellTime(Math.min(swellTime, maxSwell));
 
 			if (warningTicks % 20 == 0 && warningTicks > 20) {
 				cat.worldObj.spawnParticle("reddust",
@@ -99,8 +112,12 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 
 			if (nextTicks <= 0) {
 				PoopCats.handleWarningExpired(cat, cat.worldObj, cat.renderYawOffset, this);
+				cats$setSwellTime(0); // Reset swell
 				return;
 			}
+		} else {
+			// Reset swell when not warning
+			cats$setSwellTime(0);
 		}
 
 		if (cats$isFed()) {
@@ -191,7 +208,7 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 
 	@Override
 	public void cats$setIsFed(boolean fed) {
-		getDataWatcher().updateObject(POOP_WATCH_ID, (byte)(fed ? 1 : 0));
+		getDataWatcher().updateObject(POOP_DATA_WATCHER_ID, (byte)(fed ? 1 : 0));
 	}
 
 	@Override
@@ -201,11 +218,23 @@ public abstract class EntityOcelotMixin implements PoopCats.PoopCallback, CatPar
 
 	@Unique
 	public boolean cats$isFed() {
-		return getDataWatcher().getWatchableObjectByte(POOP_WATCH_ID) == 1;
+		return getDataWatcher().getWatchableObjectByte(POOP_DATA_WATCHER_ID) == 1;
 	}
 
 	@Unique
 	public int cats$getWarningTicks() {
 		return getDataWatcher().getWatchableObjectInt(WARNING_DATA_WATCHER_ID);
 	}
+
+	@Unique
+	public int cats$getSwellTime() {
+		return getDataWatcher().getWatchableObjectInt(SWELL_DATA_WATCHER_ID);
+	}
+
+	@Unique
+	public void cats$setSwellTime(int time) {
+		getDataWatcher().updateObject(SWELL_DATA_WATCHER_ID, time);
+	}
+
+
 }

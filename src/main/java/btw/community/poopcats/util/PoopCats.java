@@ -67,15 +67,64 @@ public class PoopCats {
 		int blockIdBelow = world.getBlockId(i, j, k);
 
 		if (blockIdBelow == Block.sand.blockID) {
+			// Made it to sand in time!
 			spawnPoop(entity, world, yawOffset);
 			callback.cats$setIsFed(false);
 			callback.cats$setWarningTicks(0);
 		} else {
-			world.createExplosion(entity, entity.posX, entity.posY, entity.posZ,
-					EXPLOSION_POWER, true);
+			// EXPLOSION with custom red particle effect
+			explodeWithRedParticles(entity, world);
 			entity.setDead();
 		}
 	}
+
+	/**
+	 * Creates a custom explosion with red particle effects
+	 */
+	private static void explodeWithRedParticles(EntityLiving entity, World world) {
+		if (world.isRemote) return;
+
+		// Play explosion sound
+		world.playSoundAtEntity(entity, CAT_EXPLOSION_SOUND.sound(), 4.0F,
+				(1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
+
+		// Create actual explosion damage
+		world.createExplosion(entity, entity.posX, entity.posY, entity.posZ,
+				EXPLOSION_POWER, true);
+
+		// Spawn lots of red particles on all clients
+		if (!world.isRemote) {
+			// Server tells clients to spawn particles
+			world.setEntityState(entity, (byte)35); // Custom particle event ID
+
+			// Also spawn some server-side for immediate effect
+			for (int i = 0; i < 20; i++) {
+				double offsetX = (world.rand.nextDouble() - 0.5D) * 2.0D;
+				double offsetY = world.rand.nextDouble() * 1.5D;
+				double offsetZ = (world.rand.nextDouble() - 0.5D) * 2.0D;
+
+				world.spawnParticle("reddust",
+						entity.posX + offsetX,
+						entity.posY + offsetY,
+						entity.posZ + offsetZ,
+						1.0, 0.0, 0.0); // Red color
+			}
+
+			// Add some "lava" particles for extra effect
+			for (int i = 0; i < 10; i++) {
+				double offsetX = (world.rand.nextDouble() - 0.5D) * 1.5D;
+				double offsetY = world.rand.nextDouble();
+				double offsetZ = (world.rand.nextDouble() - 0.5D) * 1.5D;
+
+				world.spawnParticle("lava",
+						entity.posX + offsetX,
+						entity.posY + offsetY,
+						entity.posZ + offsetZ,
+						0.0, 0.0, 0.0);
+			}
+		}
+	}
+
 
 	private static void startWarning(EntityLiving entity, World world, PoopCallback callback) {
 		callback.cats$setWarningTicks(WARNING_DURATION);

@@ -16,6 +16,7 @@ public abstract class EntityOcelot_EntityTameableMixin {
 
 	@Unique private static final byte POOP_WATCH_ID = 27;
 	@Unique private static final byte CAT_SYNC_YAW_BEFORE_POOP = 21;
+	@Unique private static final byte EXPLOSION_PARTICLE_ID = 35; // NEW
 
 	@Inject(method = "handleHealthUpdate", at = @At("HEAD"))
 	private void handlePoopEvents(byte id, CallbackInfo ci) {
@@ -32,6 +33,10 @@ public abstract class EntityOcelot_EntityTameableMixin {
 				self.rotationYaw = ((EntityLivingBase)self).renderYawOffset;
 			} else if (id == POOP_PARTICLE_ID) {
 				PoopCats.handlePoopParticles(cat);
+			} else if (id == EXPLOSION_PARTICLE_ID && self.worldObj.isRemote) {
+				// NEW: Handle explosion particles
+				// Doesn't exist yet:
+				// PoopCats.handleExplosionParticles(cat);
 			}
 		}
 	}
