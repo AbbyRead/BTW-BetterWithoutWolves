@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(EntityWolf.class)
 public class EntityWolfMixin {
@@ -18,12 +19,17 @@ public class EntityWolfMixin {
 	@Unique private static final byte POOP_PARTICLE_ID = 9;
 	@Unique private static final byte SYNC_YAW_BEFORE_POOP = 10;
 
-	@Inject(method = "attemptToShit", at = @At("HEAD"))
-	private void syncYawBeforePoop(CallbackInfoReturnable<Boolean> cir) {
+
+	@Unique private double lastPoopX, lastPoopY, lastPoopZ;
+
+	@Inject(method = "attemptToShit", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
+	private void capturePoopPosition(CallbackInfoReturnable<Boolean> cir, float poopVectorX, float poopVectorZ, double shitPosX, double shitPosY, double shitPosZ) {
 		EntityWolf wolf = (EntityWolf)(Object)this;
-		if (!wolf.worldObj.isRemote) {
-			// Tell all clients to sync this wolf’s yaw right now
-			wolf.worldObj.setEntityState(wolf, SYNC_YAW_BEFORE_POOP);
+		if (!wolf.worldObj.isRemote && cir.getReturnValue()) {
+			wolf.worldObj.setEntityState(wolf, POOP_PARTICLE_ID);
+			lastPoopX = shitPosX;
+			lastPoopY = shitPosY;
+			lastPoopZ = shitPosZ;
 		}
 	}
 
@@ -38,6 +44,7 @@ public class EntityWolfMixin {
 
 			if (!wolf.worldObj.isRemote) {
 				wolf.worldObj.setEntityState(wolf, POOP_PARTICLE_ID);
+				wolf.worldObj.setEntityState(wolf, SYNC_YAW_BEFORE_POOP);
 			}
 		}
 		ci.cancel();
@@ -51,17 +58,26 @@ public class EntityWolfMixin {
 	public void handlePoopParticles() {
 		EntityWolf wolf = (EntityWolf)(Object)this;
 
-		float yawRad = wolf.rotationYaw / 180.0f * (float)Math.PI;
-		double distanceBack = 1.0;
+		// match the poop item spawn math
+		float poopVectorX = MathHelper.sin(wolf.renderYawOffset / 180.0F * (float)Math.PI);
+		float poopVectorZ = -MathHelper.cos(wolf.renderYawOffset / 180.0F * (float)Math.PI);
+		double baseX = wolf.posX + poopVectorX;
+		double baseY = wolf.posY + 0.25;
+		double baseZ = wolf.posZ + poopVectorZ;
 
-		double smokeX = wolf.posX + MathHelper.sin(yawRad) * distanceBack + wolf.worldObj.rand.nextDouble() * 0.25 - 0.125;
-		double smokeY = wolf.posY + wolf.worldObj.rand.nextDouble() * 0.5 + 0.25;
-		double smokeZ = wolf.posZ - MathHelper.cos(yawRad) * distanceBack + wolf.worldObj.rand.nextDouble() * 0.25 - 0.125;
-
-		EntityFX mainParticle = new EntitySmokeFX(wolf.worldObj, smokeX, smokeY, smokeZ, 0, 0, 0, 0.33f);
+		// main particle
+		EntityFX mainParticle = new EntitySmokeFX(
+				wolf.worldObj,
+				baseX + wolf.worldObj.rand.nextDouble() * 0.25 - 0.125,
+				baseY + wolf.worldObj.rand.nextDouble() * 0.5,
+				baseZ + wolf.worldObj.rand.nextDouble() * 0.25 - 0.125,
+				0, 0, 0,
+				0.33f
+		);
 		mainParticle.setRBGColorF(0.4f + wolf.rand.nextFloat() * 0.1f, 0.25f + wolf.rand.nextFloat() * 0.05f, 0.1f + wolf.rand.nextFloat() * 0.05f);
 		Minecraft.getMinecraft().effectRenderer.addEffect(mainParticle);
 
+		// extra particles
 		for (int n = 0; n < 7; ++n) {
 			double offsetX = (wolf.rand.nextDouble() - 0.5) * 0.5;
 			double offsetY = wolf.rand.nextDouble() * 0.5 + 0.25;
@@ -69,16 +85,15 @@ public class EntityWolfMixin {
 
 			EntityFX particle = new EntitySmokeFX(
 					wolf.worldObj,
-					wolf.posX + MathHelper.sin(yawRad) * distanceBack + offsetX,
-					wolf.posY + offsetY,
-					wolf.posZ - MathHelper.cos(yawRad) * distanceBack + offsetZ,
+					baseX + offsetX,
+					baseY + offsetY,
+					baseZ + offsetZ,
 					wolf.rand.nextGaussian() * 0.02,
 					wolf.rand.nextGaussian() * 0.02,
 					wolf.rand.nextGaussian() * 0.02,
 					0.33f
 			);
 
-			// Brownish RGB for poop particles
 			particle.setRBGColorF(0.4f + wolf.rand.nextFloat() * 0.1f, 0.25f + wolf.rand.nextFloat() * 0.05f, 0.1f + wolf.rand.nextFloat() * 0.05f);
 			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 		}
