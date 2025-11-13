@@ -1,6 +1,5 @@
 package btw.community.poopcats.mixin;
 
-import btw.community.poopcats.mixin.access.EntityAccess;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(EntityWolf.class)
 public class EntityWolfMixin {
@@ -19,20 +17,16 @@ public class EntityWolfMixin {
 	@Unique private static final byte POOP_PARTICLE_ID = 9;
 	@Unique private static final byte SYNC_YAW_BEFORE_POOP = 10;
 
-
-	@Unique private double lastPoopX, lastPoopY, lastPoopZ;
-
-	@Inject(method = "attemptToShit", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void capturePoopPosition(CallbackInfoReturnable<Boolean> cir, float poopVectorX, float poopVectorZ, double shitPosX, double shitPosY, double shitPosZ) {
+	@Inject(method = "attemptToShit", at = @At("RETURN"))
+	private void capturePoopPosition(CallbackInfoReturnable<Boolean> cir) {
 		EntityWolf wolf = (EntityWolf)(Object)this;
 		if (!wolf.worldObj.isRemote && cir.getReturnValue()) {
 			wolf.worldObj.setEntityState(wolf, POOP_PARTICLE_ID);
-			lastPoopX = shitPosX;
-			lastPoopY = shitPosY;
-			lastPoopZ = shitPosZ;
+			wolf.worldObj.setEntityState(wolf, SYNC_YAW_BEFORE_POOP);
 		}
 	}
 
+/*
 	// ------------------------------------
 	// 💩 Inject into updateShitState — triggers poop event
 	// ------------------------------------
@@ -41,14 +35,10 @@ public class EntityWolfMixin {
 		EntityWolf wolf = (EntityWolf)(Object)this;
 		if (wolf.worldObj.rand.nextInt(24) == 0) {
 			wolf.attemptToShit();
-
-			if (!wolf.worldObj.isRemote) {
-				wolf.worldObj.setEntityState(wolf, POOP_PARTICLE_ID);
-				wolf.worldObj.setEntityState(wolf, SYNC_YAW_BEFORE_POOP);
-			}
 		}
 		ci.cancel();
 	}
+*/
 
 	// ------------------------------------
 	// 💨 Client-side poop particle effect
@@ -104,8 +94,6 @@ public class EntityWolfMixin {
 	// ------------------------------------
 	@Inject(method = "handleHealthUpdate", at = @At("HEAD"))
 	private void onHandleHealthUpdate(byte id, CallbackInfo ci) {
-		EntityWolf wolf = (EntityWolf)(Object)this;
-
 		if (id == POOP_PARTICLE_ID) {
 			this.handlePoopParticles();
 		}
