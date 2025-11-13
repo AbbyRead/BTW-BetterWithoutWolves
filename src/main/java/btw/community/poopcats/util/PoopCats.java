@@ -122,8 +122,8 @@ public class PoopCats {
 		world.spawnEntityInWorld(poop);
 
 		float vol = ((EntityLivingBaseAccess)entity).invokeGetSoundVolume();
-		world.playSoundAtEntity(entity, CAT_POOP_SOUND.sound(), vol * 8,
-				(world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F + 0.75F);
+		world.playSoundAtEntity(entity, CAT_POOP_SOUND.sound(), vol * 7,
+				(world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F + 1.6F);
 	}
 
 	private static boolean isBlockOpen(World world, int i, int j, int k) {
