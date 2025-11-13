@@ -1,18 +1,18 @@
-package btw.community.poopcats;
+package btw.community.wolfpoopcosmetics;
 
 import btw.AddonHandler;
 import btw.BTWAddon;
 
-public class PoopCatsAddon extends BTWAddon {
+public class WolfPoopCosmeticsAddon extends BTWAddon {
 
-	private static PoopCatsAddon instance;
+	private static WolfPoopCosmeticsAddon instance;
 
-	public PoopCatsAddon() {
+	public WolfPoopCosmeticsAddon() {
 		super();
 		instance = this;
 	}
 
-	public static PoopCatsAddon getInstance() {
+	public static WolfPoopCosmeticsAddon getInstance() {
 		return instance;
 	}
 

@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
-  "id": "poopcats",
+  "id": "wolfpoopcosmetics",
   "version": "${version}",
-  "name": "Poop Cats",
-  "description": "Cats poop now.",
+  "name": "Wolf Poop Cosmetics",
+  "description": "Pooping wolves now is better and not look dumb.",
   "authors": [
     "Abigail Read"
   ],
   "contact": {
-    "homepage": "https://github.com/AbbyRead/BTW-PoopCats",
-    "sources": "https://github.com/AbbyRead/BTW-PoopCats",
-    "issues": "https://github.com/AbbyRead/BTW-PoopCats/issues"
+    "homepage": "",
+    "sources": "",
+    "issues": ""
   },
   "license": "0BSD",
-  "icon": "assets/poopcats/icon.png",
+  "icon": "assets/wolfpoopcosmetics/icon.png",
   "environment": "*",
   "entrypoints": {
     "btw:addon": [
-      "btw.community.poopcats.PoopCatsAddon"
+      "btw.community.wolfpoopcosmetics.WolfPoopCosmeticsAddon"
     ]
   },
   "custom": {
-    "btw:addon_prefix": "AR_PC"
+    "btw:addon_prefix": "AR_WPC"
   },
   "mixins": [
-    "poopcats.mixins.json"
+    "wolfpoopcosmetics.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.25",

@@ -1,4 +1,4 @@
-package btw.community.poopcats.mixin;
+package btw.community.wolfpoopcosmetics.mixin;
 
 import net.minecraft.src.Entity;
 import net.minecraft.src.EntityLivingBase;
