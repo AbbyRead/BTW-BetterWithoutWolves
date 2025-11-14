@@ -80,28 +80,6 @@ public class PoopCats {
 		}
 	}
 
-	/**
-	 * Creates a custom explosion with red particle effects
-	 */
-	private static void explodeWithParticles(EntityLiving entity, World world) {
-		if (world.isRemote) return;
-
-		// Play explosion sound
-		world.playSoundAtEntity(entity, CAT_EXPLOSION_SOUND.sound(), 4.0F,
-				(1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
-
-		// Create actual explosion damage
-		world.createExplosion(entity, entity.posX, entity.posY, entity.posZ,
-				EXPLOSION_POWER, true);
-
-		// Spawn lots of red particles on all clients
-		if (!world.isRemote) {
-			// Server tells clients to spawn particles
-			world.setEntityState(entity, (byte)35); // Custom particle event ID
-		}
-	}
-
-
 	private static void startWarning(EntityLiving entity, World world, PoopCallback callback) {
 		callback.cats$setWarningTicks(WARNING_DURATION);
 		world.playSoundAtEntity(entity, CAT_WARNING_SOUND.sound(), 1.0F, 0.8F);
@@ -205,47 +183,40 @@ public class PoopCats {
 			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 		}
 	}
+
 	/**
 	 * Creates a custom explosion with red particle effects
+	 * Strategy: Don't suppress FX (to keep sound), but spawn tons of custom particles
+	 * immediately to visually overwhelm/hide the default gray explosion particles
 	 */
 	private static void explodeWithRedParticles(EntityLiving entity, World world) {
 		if (world.isRemote) return;
 
-		// 1. FIX: Play our custom sound manually, as the explosion's internal sound is now suppressed.
-		world.playSoundAtEntity(entity, CAT_EXPLOSION_SOUND.sound(), 4.0F,
-				(1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
-
-		// 2. Create the explosion object manually
+		// Create the explosion object manually
 		Explosion explosion = new Explosion(world, entity, entity.posX, entity.posY, entity.posZ, EXPLOSION_POWER);
 
-		// 3. Set flags to suppress default particles/sound but allow block damage
+		// Configure explosion
 		explosion.isFlaming = false;
 		explosion.isSmoking = true; // Keeps block-breaking logic active
-		explosion.suppressFX = true; // SUPPRESSES: Default sound, "hugeexplosion" particle, "largeexplode" particle
+		// DON'T set suppressFX - let the sound play naturally
 
-		// 4. Calculate damage and affected blocks
+		// Calculate damage and affected blocks
 		explosion.doExplosionA();
 
-		// 5. Apply damage and block breaking, passing 'false' to suppress block-by-block particles
-		// This argument (par1 in Explosion.java) stops the smaller "explode" and "smoke" particles for each block destroyed.
+		// Apply damage and block breaking (passing false suppresses per-block particles)
 		explosion.doExplosionB(false);
 
-		// 6. Tell clients to spawn our custom particles
-		if (!world.isRemote) {
-			// Server tells clients to spawn particles
-			world.setEntityState(entity, (byte)35); // Custom particle event ID
-		}
+		// Immediately tell ALL clients to spawn our custom particles
+		// The sheer volume of brown/red particles should hide any gray ones
+		world.setEntityState(entity, (byte)35);
 	}
-
-
-	// ... (rest of the file remains the same)
 
 	@Environment(EnvType.CLIENT)
 	public static void handleExplosionParticles(EntityOcelot cat) {
 		World world = cat.worldObj;
 		Minecraft mc = Minecraft.getMinecraft();
 
-		// --- Brown "Poof" Cloud (our replacement for grey smoke) ---
+		// --- Brown "Poof" Cloud ---
 		int poofCount = 20;
 		float brownRed = 0.4f;
 		float brownGreen = 0.25f;
