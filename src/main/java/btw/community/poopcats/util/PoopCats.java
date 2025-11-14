@@ -15,7 +15,7 @@ public class PoopCats {
 	public static final AddonSoundRegistryEntry CAT_WARNING_SOUND =
 			new AddonSoundRegistryEntry("mob.cat.hiss", 1);
 	public static final AddonSoundRegistryEntry CAT_EXPLOSION_SOUND =
-			new AddonSoundRegistryEntry("random.explosion", 2);
+			new AddonSoundRegistryEntry("random.explode", 2);
 
 	private static final int BASE_POOP_RATE = 60;
 	private static final int DARK_MULTIPLIER = 2;
