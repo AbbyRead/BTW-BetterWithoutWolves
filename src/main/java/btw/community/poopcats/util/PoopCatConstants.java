@@ -1,7 +1,7 @@
 package btw.community.poopcats.util;
 
 // This class holds all magic numbers, NBT keys, and IDs for the mod.
-public class PoopCatsConstants {
+public class PoopCatConstants {
 
 	// --- Data Watcher IDs ---
 	// From EntityOcelotMixin

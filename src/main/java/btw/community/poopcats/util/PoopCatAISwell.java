@@ -1,18 +1,18 @@
 package btw.community.poopcats.util;
 
-import btw.community.poopcats.interfaces.PoopCallback;
+import btw.community.poopcats.interfaces.PoopCatStateAccess;
 import net.minecraft.src.EntityAIBase;
 import net.minecraft.src.EntityLivingBase;
 import net.minecraft.src.EntityOcelot;
 
-public class EntityAIOcelotSwell extends EntityAIBase {
+public class PoopCatAISwell extends EntityAIBase {
 
 	private final EntityOcelot ocelot;
 	private EntityLivingBase target;
 	private final double rangeSq;
 	private int hissCooldown = 0;
 
-	public EntityAIOcelotSwell(EntityOcelot ocelot, double range) {
+	public PoopCatAISwell(EntityOcelot ocelot, double range) {
 		this.ocelot = ocelot;
 		this.rangeSq = range * range;
 		this.setMutexBits(1);
@@ -31,7 +31,7 @@ public class EntityAIOcelotSwell extends EntityAIBase {
 		ocelot.getNavigator().clearPathEntity();
 
 		// Use new interface and constant
-		((PoopCallback) ocelot).cats$setWarningTicks(PoopCatsConstants.WARNING_DURATION);
+		((PoopCatStateAccess) ocelot).cats$setWarningTicks(PoopCatConstants.WARNING_DURATION);
 		ocelot.playSound("mob.cat.hiss", 1.0F, 1.0F);
 	}
 
@@ -46,7 +46,7 @@ public class EntityAIOcelotSwell extends EntityAIBase {
 
 	@Override
 	public void resetTask() {
-		((PoopCallback) ocelot).cats$setWarningTicks(0); // Use new interface
+		((PoopCatStateAccess) ocelot).cats$setWarningTicks(0); // Use new interface
 		target = null;
 	}
 
@@ -55,16 +55,16 @@ public class EntityAIOcelotSwell extends EntityAIBase {
 		if (target == null) return;
 
 		ocelot.faceEntity(target, 30.0F, 30.0F);
-		int ticks = ((PoopCallback) ocelot).cats$getWarningTicks();
+		int ticks = ((PoopCatStateAccess) ocelot).cats$getWarningTicks();
 
 		if (ticks <= 0) {
-			PoopCats.handleWarningExpired(ocelot, ocelot.worldObj, ocelot.renderYawOffset,
-					(PoopCallback) ocelot);
+			PoopCatHelper.handleWarningExpired(ocelot, ocelot.worldObj, ocelot.renderYawOffset,
+					(PoopCatStateAccess) ocelot);
 			resetTask();
 			return;
 		}
 
-		((PoopCallback) ocelot).cats$setWarningTicks(ticks - 1);
+		((PoopCatStateAccess) ocelot).cats$setWarningTicks(ticks - 1);
 		// Occasional hiss
 		if (hissCooldown-- <= 0) {
 			ocelot.playSound("mob.cat.hiss", 1.0F, 1.0F);

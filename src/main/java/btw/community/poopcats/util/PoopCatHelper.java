@@ -2,7 +2,7 @@ package btw.community.poopcats.util;
 
 import btw.block.BTWBlocks;
 import btw.client.fx.BTWEffectManager;
-import btw.community.poopcats.interfaces.PoopCallback;
+import btw.community.poopcats.interfaces.PoopCatStateAccess;
 import btw.community.poopcats.mixin.access.EntityLivingBaseAccess;
 import btw.item.BTWItems;
 import btw.util.sounds.AddonSoundRegistryEntry;
@@ -10,7 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
 
-public class PoopCats {
+public class PoopCatHelper {
 
 	public static final AddonSoundRegistryEntry CAT_POOP_SOUND =
 			new AddonSoundRegistryEntry("btw:entity.witch.death1", 1);
@@ -27,7 +27,7 @@ public class PoopCats {
 	 *
 	 * @return true if the interaction was handled (and should be cancelled)
 	 */
-	public static boolean handleCatInteraction(EntityOcelot cat, EntityPlayer player, PoopCallback callback) {
+	public static boolean handleCatInteraction(EntityOcelot cat, EntityPlayer player, PoopCatStateAccess callback) {
 		ItemStack stack = player.inventory.getCurrentItem();
 
 		if (cat.isTamed() && stack != null && cat.isBreedingItem(stack)) {
@@ -40,7 +40,7 @@ public class PoopCats {
 				}
 
 				callback.cats$setIsFed(true);
-				cat.heal(PoopCatsConstants.HEALING_AMOUNT);
+				cat.heal(PoopCatConstants.HEALING_AMOUNT);
 
 				cat.worldObj.playAuxSFX(BTWEffectManager.BURP_SOUND_EFFECT_ID,
 						MathHelper.floor_double(cat.posX),
@@ -64,7 +64,7 @@ public class PoopCats {
 	 * Called from EntityOcelotMixin.
 	 */
 	public static void updateCatLogic(EntityOcelot cat) {
-		PoopCallback callback = (PoopCallback) cat;
+		PoopCatStateAccess callback = (PoopCatStateAccess) cat;
 
 		// Store last swell time for interpolation
 		callback.cats$setLastSwellTime(callback.cats$getSwellTime());
@@ -79,8 +79,8 @@ public class PoopCats {
 			callback.cats$setWarningTicks(nextTicks);
 
 			// Increase swell as warning progresses
-			int swellTime = PoopCatsConstants.MAX_SWELL_TIME - (nextTicks * PoopCatsConstants.MAX_SWELL_TIME / PoopCatsConstants.WARNING_DURATION);
-			callback.cats$setSwellTime(Math.min(swellTime, PoopCatsConstants.MAX_SWELL_TIME));
+			int swellTime = PoopCatConstants.MAX_SWELL_TIME - (nextTicks * PoopCatConstants.MAX_SWELL_TIME / PoopCatConstants.WARNING_DURATION);
+			callback.cats$setSwellTime(Math.min(swellTime, PoopCatConstants.MAX_SWELL_TIME));
 
 			if (warningTicks % 20 == 0 && warningTicks > 20) {
 				cat.worldObj.spawnParticle("reddust",
@@ -88,7 +88,7 @@ public class PoopCats {
 						1.0, 0.0, 0.0);
 
 				cat.worldObj.playSoundAtEntity(cat,
-						PoopCats.CAT_WARNING_SOUND.sound(),
+						PoopCatHelper.CAT_WARNING_SOUND.sound(),
 						1.0F, 0.8F);
 			}
 
@@ -99,7 +99,7 @@ public class PoopCats {
 			}
 
 			if (nextTicks <= 0) {
-				PoopCats.handleWarningExpired(cat, cat.worldObj, cat.renderYawOffset, callback);
+				PoopCatHelper.handleWarningExpired(cat, cat.worldObj, cat.renderYawOffset, callback);
 				callback.cats$setSwellTime(0); // Reset swell
 				return;
 			}
@@ -109,25 +109,25 @@ public class PoopCats {
 		}
 
 		if (callback.cats$isFed()) {
-			PoopCats.maybePoop(cat, cat.worldObj, cat.renderYawOffset, callback);
+			PoopCatHelper.maybePoop(cat, cat.worldObj, cat.renderYawOffset, callback);
 		}
 	}
 
 
 	// --- Poop Event Handling ---
 
-	public static void maybePoop(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
+	public static void maybePoop(EntityLiving entity, World world, float yawOffset, PoopCatStateAccess callback) {
 		if (world.isRemote) return;
 
 		int chance = 1;
-		if (isDark(world, entity)) chance *= PoopCatsConstants.DARK_MULTIPLIER;
+		if (isDark(world, entity)) chance *= PoopCatConstants.DARK_MULTIPLIER;
 
-		if (world.rand.nextInt(PoopCatsConstants.BASE_POOP_RATE) < chance) {
+		if (world.rand.nextInt(PoopCatConstants.BASE_POOP_RATE) < chance) {
 			handlePoopCheck(entity, world, yawOffset, callback);
 		}
 	}
 
-	private static void handlePoopCheck(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
+	private static void handlePoopCheck(EntityLiving entity, World world, float yawOffset, PoopCatStateAccess callback) {
 		int i = MathHelper.floor_double(entity.posX);
 		int j = MathHelper.floor_double(entity.posY) - 1;
 		int k = MathHelper.floor_double(entity.posZ);
@@ -143,7 +143,7 @@ public class PoopCats {
 		}
 	}
 
-	public static void handleWarningExpired(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
+	public static void handleWarningExpired(EntityLiving entity, World world, float yawOffset, PoopCatStateAccess callback) {
 		if (world.isRemote) return;
 
 		int i = MathHelper.floor_double(entity.posX);
@@ -163,8 +163,8 @@ public class PoopCats {
 		}
 	}
 
-	private static void startWarning(EntityLiving entity, World world, PoopCallback callback) {
-		callback.cats$setWarningTicks(PoopCatsConstants.WARNING_DURATION);
+	private static void startWarning(EntityLiving entity, World world, PoopCatStateAccess callback) {
+		callback.cats$setWarningTicks(PoopCatConstants.WARNING_DURATION);
 		world.playSoundAtEntity(entity, CAT_WARNING_SOUND.sound(), 1.0F, 0.8F);
 
 		for (int n = 0; n < 10; ++n) {
@@ -188,8 +188,8 @@ public class PoopCats {
 		if (world.isRemote) return;
 
 		// Tell clients to spawn particles
-		world.setEntityState(entity, PoopCatsConstants.POOP_PARTICLE_ID);
-		world.setEntityState(entity, PoopCatsConstants.SYNC_YAW_BEFORE_POOP);
+		world.setEntityState(entity, PoopCatConstants.POOP_PARTICLE_ID);
+		world.setEntityState(entity, PoopCatConstants.SYNC_YAW_BEFORE_POOP);
 
 		// Server-side: spawn poop item
 		float dx = MathHelper.sin(yawOffset / 180.0f * (float)Math.PI);
@@ -270,14 +270,14 @@ public class PoopCats {
 	private static void explodeWithRedParticles(EntityLiving entity, World world) {
 		if (world.isRemote) return;
 
-		Explosion explosion = new Explosion(world, entity, entity.posX, entity.posY, entity.posZ, PoopCatsConstants.EXPLOSION_POWER);
+		Explosion explosion = new Explosion(world, entity, entity.posX, entity.posY, entity.posZ, PoopCatConstants.EXPLOSION_POWER);
 		explosion.isFlaming = false;
 		explosion.isSmoking = true;
 		explosion.doExplosionA();
 		explosion.doExplosionB(false);
 
 		// Tell clients to spawn our custom particles
-		world.setEntityState(entity, PoopCatsConstants.EXPLOSION_PARTICLE_ID);
+		world.setEntityState(entity, PoopCatConstants.EXPLOSION_PARTICLE_ID);
 	}
 
 	@Environment(EnvType.CLIENT)

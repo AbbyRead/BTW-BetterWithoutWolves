@@ -1,7 +1,7 @@
 package btw.community.poopcats.mixin;
 
-import btw.community.poopcats.util.PoopCats;
-import btw.community.poopcats.util.PoopCatsConstants;
+import btw.community.poopcats.util.PoopCatHelper;
+import btw.community.poopcats.util.PoopCatConstants;
 import net.minecraft.src.Entity;
 import net.minecraft.src.EntityLivingBase;
 import net.minecraft.src.EntityOcelot;
@@ -19,14 +19,14 @@ public abstract class EntityTameableMixin {
 		Entity self = (Entity)(Object)this;
 
 		if (self instanceof EntityOcelot cat) {
-			if (id == PoopCatsConstants.SYNC_YAW_BEFORE_POOP && self.worldObj.isRemote) {
+			if (id == PoopCatConstants.SYNC_YAW_BEFORE_POOP && self.worldObj.isRemote) {
 				// Sync cat's rotation with body orientation
 				self.rotationYaw = ((EntityLivingBase)self).renderYawOffset;
-			} else if (id == PoopCatsConstants.POOP_PARTICLE_ID) {
-				PoopCats.handlePoopParticles(cat);
-			} else if (id == PoopCatsConstants.EXPLOSION_PARTICLE_ID && self.worldObj.isRemote) {
+			} else if (id == PoopCatConstants.POOP_PARTICLE_ID) {
+				PoopCatHelper.handlePoopParticles(cat);
+			} else if (id == PoopCatConstants.EXPLOSION_PARTICLE_ID && self.worldObj.isRemote) {
 				// Handle explosion particles
-				PoopCats.handleExplosionParticles(cat);
+				PoopCatHelper.handleExplosionParticles(cat);
 			}
 		}
 	}

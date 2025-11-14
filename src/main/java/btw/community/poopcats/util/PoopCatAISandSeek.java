@@ -1,9 +1,9 @@
 package btw.community.poopcats.util;
 
-import btw.community.poopcats.interfaces.PoopCallback;
+import btw.community.poopcats.interfaces.PoopCatStateAccess;
 import net.minecraft.src.*;
 
-public class EntityAIOcelotSeekSand extends EntityAIBase {
+public class PoopCatAISandSeek extends EntityAIBase {
 
 	private final EntityOcelot ocelot;
 	private final double speed;
@@ -13,7 +13,7 @@ public class EntityAIOcelotSeekSand extends EntityAIBase {
 	private int targetZ;
 	private boolean foundSand;
 
-	public EntityAIOcelotSeekSand(EntityOcelot ocelot, double speed) {
+	public PoopCatAISandSeek(EntityOcelot ocelot, double speed) {
 		this.ocelot = ocelot;
 		this.speed = speed;
 		this.setMutexBits(1); // Movement mutex
@@ -21,7 +21,7 @@ public class EntityAIOcelotSeekSand extends EntityAIBase {
 
 	@Override
 	public boolean shouldExecute() {
-		if (!(ocelot instanceof PoopCallback callback)) { // Use new interface
+		if (!(ocelot instanceof PoopCatStateAccess callback)) { // Use new interface
 			return false;
 		}
 
@@ -49,7 +49,7 @@ public class EntityAIOcelotSeekSand extends EntityAIBase {
 
 	@Override
 	public boolean continueExecuting() {
-		if (!(ocelot instanceof PoopCallback callback)) { // Use new interface
+		if (!(ocelot instanceof PoopCatStateAccess callback)) { // Use new interface
 			return false;
 		}
 

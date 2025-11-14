@@ -4,7 +4,7 @@ package btw.community.poopcats.interfaces;
  * Interface implemented by EntityOcelotMixin to provide
  * access to mod-added data and methods.
  */
-public interface PoopCallback {
+public interface PoopCatStateAccess {
 	boolean cats$isFed();
 	void cats$setIsFed(boolean fed);
 

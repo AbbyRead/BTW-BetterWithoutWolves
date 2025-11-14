@@ -1,6 +1,6 @@
 package btw.community.poopcats.mixin;
 
-import btw.community.poopcats.interfaces.PoopCallback;
+import btw.community.poopcats.interfaces.PoopCatStateAccess;
 import net.minecraft.src.DamageSource;
 import net.minecraft.src.EntityAnimal;
 import net.minecraft.src.EntityOcelot;
@@ -22,7 +22,7 @@ public abstract class EntityAnimalMixin {
 		EntityAnimal animal = (EntityAnimal)(Object)this;
 
 		// Only handle ocelots/cats
-		if (animal instanceof EntityOcelot && animal instanceof PoopCallback callback) {
+		if (animal instanceof EntityOcelot && animal instanceof PoopCatStateAccess callback) {
 			callback.cats$setIsFed(false);
 			callback.cats$setWarningTicks(0);
 		}

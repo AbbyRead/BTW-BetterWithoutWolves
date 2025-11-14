@@ -1,7 +1,7 @@
 package btw.community.poopcats.mixin;
 
-import btw.community.poopcats.interfaces.PoopCallback;
-import btw.community.poopcats.util.PoopCatsConstants;
+import btw.community.poopcats.interfaces.PoopCatStateAccess;
+import btw.community.poopcats.util.PoopCatConstants;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,12 +20,12 @@ public abstract class RenderOcelotMixin extends RenderLiving {
 	@Inject(method = "preRenderCallback(Lnet/minecraft/src/EntityLivingBase;F)V",
 			at = @At("TAIL"))
 	private void applyCatSwelling(EntityLivingBase entity, float partialTicks, CallbackInfo ci) {
-		if (entity instanceof EntityOcelot && entity instanceof PoopCallback callback) {
+		if (entity instanceof EntityOcelot && entity instanceof PoopCatStateAccess callback) {
 			int warningTicks = callback.cats$getWarningTicks();
 
 			if (warningTicks > 0) {
 				// Calculate swell progress (0.0 to 1.0)
-				float swellProgress = 1.0F - (warningTicks / (float)PoopCatsConstants.WARNING_DURATION);
+				float swellProgress = 1.0F - (warningTicks / (float) PoopCatConstants.WARNING_DURATION);
 
 				// Apply exponential curve for dramatic effect
 				swellProgress = swellProgress * swellProgress;
@@ -46,13 +46,13 @@ public abstract class RenderOcelotMixin extends RenderLiving {
 
 	@Unique
 	private float poopcats$getCatFlashIntensity(EntityOcelot cat, float partialTicks) {
-		if (cat instanceof PoopCallback callback) {
+		if (cat instanceof PoopCatStateAccess callback) {
 			// Interpolate swell time for smooth flashing
 			float interpolatedSwell = (float)callback.cats$getLastSwellTime() +
 					(float)(callback.cats$getSwellTime() - callback.cats$getLastSwellTime()) * partialTicks;
 
 			// Mimic creeper logic (fuseTime - 2)
-			float intensity = interpolatedSwell / (float)(PoopCatsConstants.MAX_SWELL_TIME - 2);
+			float intensity = interpolatedSwell / (float)(PoopCatConstants.MAX_SWELL_TIME - 2);
 
 			if (intensity < 0.0F) intensity = 0.0F;
 			if (intensity > 1.0F) intensity = 1.0F;
