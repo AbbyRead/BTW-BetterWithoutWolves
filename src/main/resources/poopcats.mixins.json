@@ -2,19 +2,18 @@
   "required": true,
   "minVersion": "0.8",
   "package": "btw.community.poopcats.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "EntityOcelot_EntityAnimalMixin",
-    "EntityOcelot_EntityTameableMixin",
+    "EntityAnimalMixin",
     "EntityOcelotMixin",
+    "EntityTameableMixin",
     "RenderOcelotMixin",
     "access.EntityAccess",
     "access.EntityLivingAccess",
     "access.EntityLivingBaseAccess"
   ],
-  "injectors": {
-    "defaultRequire": 1
-  },
   "client": [
+  ],
+  "server": [
   ]
 }

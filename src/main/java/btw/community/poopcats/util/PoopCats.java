@@ -1,6 +1,8 @@
 package btw.community.poopcats.util;
 
 import btw.block.BTWBlocks;
+import btw.client.fx.BTWEffectManager;
+import btw.community.poopcats.interfaces.PoopCallback;
 import btw.community.poopcats.mixin.access.EntityLivingBaseAccess;
 import btw.item.BTWItems;
 import btw.util.sounds.AddonSoundRegistryEntry;
@@ -17,29 +19,110 @@ public class PoopCats {
 	public static final AddonSoundRegistryEntry CAT_EXPLOSION_SOUND =
 			new AddonSoundRegistryEntry("random.explode", 2);
 
-	private static final int BASE_POOP_RATE = 60;
-	private static final int DARK_MULTIPLIER = 2;
-	private static final float EXPLOSION_POWER = 1.0F;
-	private static final int WARNING_DURATION = 100;
+	// --- Main Logic (Moved from Mixin) ---
 
-	public static final byte POOP_PARTICLE_ID = 9;
-	public static final byte SYNC_YAW_BEFORE_POOP = 21;
+	/**
+	 * Handles the feeding interaction logic.
+	 * Called from EntityOcelotMixin.
+	 *
+	 * @return true if the interaction was handled (and should be cancelled)
+	 */
+	public static boolean handleCatInteraction(EntityOcelot cat, EntityPlayer player, PoopCallback callback) {
+		ItemStack stack = player.inventory.getCurrentItem();
 
-	public interface PoopCallback {
-		void cats$setIsFed(boolean fed);
-		void cats$setWarningTicks(int ticks);
-		int cats$getWarningTicks();
-		int cats$getSwellTime();
-		int cats$getLastSwellTime();
+		if (cat.isTamed() && stack != null && cat.isBreedingItem(stack)) {
+			if (!callback.cats$isFed()) {
+				if (!player.capabilities.isCreativeMode) {
+					--stack.stackSize;
+					if (stack.stackSize <= 0) {
+						player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
+					}
+				}
+
+				callback.cats$setIsFed(true);
+				cat.heal(PoopCatsConstants.HEALING_AMOUNT);
+
+				cat.worldObj.playAuxSFX(BTWEffectManager.BURP_SOUND_EFFECT_ID,
+						MathHelper.floor_double(cat.posX),
+						MathHelper.floor_double(cat.posY),
+						MathHelper.floor_double(cat.posZ), 0);
+
+				for (int i = 0; i < 7; ++i) {
+					double px = cat.posX + (cat.worldObj.rand.nextDouble() - 0.5) * 0.5;
+					double py = cat.posY + cat.worldObj.rand.nextDouble() * 0.5 + 0.5;
+					double pz = cat.posZ + (cat.worldObj.rand.nextDouble() - 0.5) * 0.5;
+					cat.worldObj.spawnParticle("heart", px, py, pz, 0.0, 0.0, 0.0);
+				}
+				return true; // Handled
+			}
+		}
+		return false; // Not handled
 	}
+
+	/**
+	 * Handles all cat pooping logic per-tick.
+	 * Called from EntityOcelotMixin.
+	 */
+	public static void updateCatLogic(EntityOcelot cat) {
+		PoopCallback callback = (PoopCallback) cat;
+
+		// Store last swell time for interpolation
+		callback.cats$setLastSwellTime(callback.cats$getSwellTime());
+
+		if (!cat.isTamed()) {
+			return;
+		}
+
+		int warningTicks = callback.cats$getWarningTicks();
+		if (warningTicks > 0) {
+			int nextTicks = warningTicks - 1;
+			callback.cats$setWarningTicks(nextTicks);
+
+			// Increase swell as warning progresses
+			int swellTime = PoopCatsConstants.MAX_SWELL_TIME - (nextTicks * PoopCatsConstants.MAX_SWELL_TIME / PoopCatsConstants.WARNING_DURATION);
+			callback.cats$setSwellTime(Math.min(swellTime, PoopCatsConstants.MAX_SWELL_TIME));
+
+			if (warningTicks % 20 == 0 && warningTicks > 20) {
+				cat.worldObj.spawnParticle("reddust",
+						cat.posX, cat.posY + 0.5, cat.posZ,
+						1.0, 0.0, 0.0);
+
+				cat.worldObj.playSoundAtEntity(cat,
+						PoopCats.CAT_WARNING_SOUND.sound(),
+						1.0F, 0.8F);
+			}
+
+			if (nextTicks == 10) {
+				cat.worldObj.spawnParticle("reddust",
+						cat.posX, cat.posY + 0.5, cat.posZ,
+						1.0, 0.0, 0.0);
+			}
+
+			if (nextTicks <= 0) {
+				PoopCats.handleWarningExpired(cat, cat.worldObj, cat.renderYawOffset, callback);
+				callback.cats$setSwellTime(0); // Reset swell
+				return;
+			}
+		} else {
+			// Reset swell when not warning
+			callback.cats$setSwellTime(0);
+		}
+
+		if (callback.cats$isFed()) {
+			PoopCats.maybePoop(cat, cat.worldObj, cat.renderYawOffset, callback);
+		}
+	}
+
+
+	// --- Poop Event Handling ---
 
 	public static void maybePoop(EntityLiving entity, World world, float yawOffset, PoopCallback callback) {
 		if (world.isRemote) return;
 
 		int chance = 1;
-		if (isDark(world, entity)) chance *= DARK_MULTIPLIER;
+		if (isDark(world, entity)) chance *= PoopCatsConstants.DARK_MULTIPLIER;
 
-		if (world.rand.nextInt(BASE_POOP_RATE) < chance) {
+		if (world.rand.nextInt(PoopCatsConstants.BASE_POOP_RATE) < chance) {
 			handlePoopCheck(entity, world, yawOffset, callback);
 		}
 	}
@@ -81,7 +164,7 @@ public class PoopCats {
 	}
 
 	private static void startWarning(EntityLiving entity, World world, PoopCallback callback) {
-		callback.cats$setWarningTicks(WARNING_DURATION);
+		callback.cats$setWarningTicks(PoopCatsConstants.WARNING_DURATION);
 		world.playSoundAtEntity(entity, CAT_WARNING_SOUND.sound(), 1.0F, 0.8F);
 
 		for (int n = 0; n < 10; ++n) {
@@ -105,8 +188,8 @@ public class PoopCats {
 		if (world.isRemote) return;
 
 		// Tell clients to spawn particles
-		world.setEntityState(entity, POOP_PARTICLE_ID);
-		world.setEntityState(entity, SYNC_YAW_BEFORE_POOP);
+		world.setEntityState(entity, PoopCatsConstants.POOP_PARTICLE_ID);
+		world.setEntityState(entity, PoopCatsConstants.SYNC_YAW_BEFORE_POOP);
 
 		// Server-side: spawn poop item
 		float dx = MathHelper.sin(yawOffset / 180.0f * (float)Math.PI);
@@ -142,10 +225,10 @@ public class PoopCats {
 		return block == null;
 	}
 
+	// --- Client-Side Particle Handlers ---
 
 	@Environment(EnvType.CLIENT)
 	public static void handlePoopParticles(EntityOcelot cat) {
-
 		float poopVectorX = MathHelper.sin(cat.renderYawOffset / 180.0F * (float)Math.PI);
 		float poopVectorZ = -MathHelper.cos(cat.renderYawOffset / 180.0F * (float)Math.PI);
 		double baseX = cat.posX + poopVectorX;
@@ -184,39 +267,23 @@ public class PoopCats {
 		}
 	}
 
-	/**
-	 * Creates a custom explosion with red particle effects
-	 * Strategy: Don't suppress FX (to keep sound), but spawn tons of custom particles
-	 * immediately to visually overwhelm/hide the default gray explosion particles
-	 */
 	private static void explodeWithRedParticles(EntityLiving entity, World world) {
 		if (world.isRemote) return;
 
-		// Create the explosion object manually
-		Explosion explosion = new Explosion(world, entity, entity.posX, entity.posY, entity.posZ, EXPLOSION_POWER);
-
-		// Configure explosion
+		Explosion explosion = new Explosion(world, entity, entity.posX, entity.posY, entity.posZ, PoopCatsConstants.EXPLOSION_POWER);
 		explosion.isFlaming = false;
-		explosion.isSmoking = true; // Keeps block-breaking logic active
-		// DON'T set suppressFX - let the sound play naturally
-
-		// Calculate damage and affected blocks
+		explosion.isSmoking = true;
 		explosion.doExplosionA();
-
-		// Apply damage and block breaking (passing false suppresses per-block particles)
 		explosion.doExplosionB(false);
 
-		// Immediately tell ALL clients to spawn our custom particles
-		// The sheer volume of brown/red particles should hide any gray ones
-		world.setEntityState(entity, (byte)35);
+		// Tell clients to spawn our custom particles
+		world.setEntityState(entity, PoopCatsConstants.EXPLOSION_PARTICLE_ID);
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static void handleExplosionParticles(EntityOcelot cat) {
 		World world = cat.worldObj;
 		Minecraft mc = Minecraft.getMinecraft();
-
-		// --- Brown "Poof" Cloud ---
 		int poofCount = 20;
 		float brownRed = 0.4f;
 		float brownGreen = 0.25f;
@@ -231,7 +298,6 @@ public class PoopCats {
 			double posY = cat.posY + world.rand.nextDouble() * (double)cat.height;
 			double posZ = cat.posZ + (world.rand.nextFloat() - 0.5D) * (double)cat.width;
 
-			// Use EntitySmokeFX
 			EntityFX poof = new EntitySmokeFX(
 					world,
 					posX,
@@ -242,14 +308,11 @@ public class PoopCats {
 					motionZ,
 					1.5f
 			);
-
-			// Color it brown
 			poof.setRBGColorF(
 					brownRed + world.rand.nextFloat() * 0.1f,
 					brownGreen + world.rand.nextFloat() * 0.05f,
 					brownBlue + world.rand.nextFloat() * 0.05f
 			);
-
 			mc.effectRenderer.addEffect(poof);
 		}
 
@@ -310,5 +373,4 @@ public class PoopCats {
 			mc.effectRenderer.addEffect(spray);
 		}
 	}
-// ...
 }

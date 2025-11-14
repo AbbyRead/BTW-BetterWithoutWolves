@@ -1,5 +1,6 @@
 package btw.community.poopcats.util;
 
+import btw.community.poopcats.interfaces.PoopCallback;
 import net.minecraft.src.EntityAIBase;
 import net.minecraft.src.EntityLivingBase;
 import net.minecraft.src.EntityOcelot;
@@ -29,8 +30,8 @@ public class EntityAIOcelotSwell extends EntityAIBase {
 		this.target = ocelot.getAttackTarget();
 		ocelot.getNavigator().clearPathEntity();
 
-		// Begin warning phase (3–5 sec)
-		((PoopCats.PoopCallback) ocelot).cats$setWarningTicks(100);
+		// Use new interface and constant
+		((PoopCallback) ocelot).cats$setWarningTicks(PoopCatsConstants.WARNING_DURATION);
 		ocelot.playSound("mob.cat.hiss", 1.0F, 1.0F);
 	}
 
@@ -45,7 +46,7 @@ public class EntityAIOcelotSwell extends EntityAIBase {
 
 	@Override
 	public void resetTask() {
-		((PoopCats.PoopCallback) ocelot).cats$setWarningTicks(0);
+		((PoopCallback) ocelot).cats$setWarningTicks(0); // Use new interface
 		target = null;
 	}
 
@@ -54,17 +55,16 @@ public class EntityAIOcelotSwell extends EntityAIBase {
 		if (target == null) return;
 
 		ocelot.faceEntity(target, 30.0F, 30.0F);
-		int ticks = ((PoopCats.PoopCallback) ocelot).cats$getWarningTicks();
+		int ticks = ((PoopCallback) ocelot).cats$getWarningTicks();
 
 		if (ticks <= 0) {
 			PoopCats.handleWarningExpired(ocelot, ocelot.worldObj, ocelot.renderYawOffset,
-					(PoopCats.PoopCallback) ocelot);
+					(PoopCallback) ocelot);
 			resetTask();
 			return;
 		}
 
-		((PoopCats.PoopCallback) ocelot).cats$setWarningTicks(ticks - 1);
-
+		((PoopCallback) ocelot).cats$setWarningTicks(ticks - 1);
 		// Occasional hiss
 		if (hissCooldown-- <= 0) {
 			ocelot.playSound("mob.cat.hiss", 1.0F, 1.0F);

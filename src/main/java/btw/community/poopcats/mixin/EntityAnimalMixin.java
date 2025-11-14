@@ -1,14 +1,16 @@
 package btw.community.poopcats.mixin;
 
-import btw.community.poopcats.util.PoopCats;
-import net.minecraft.src.*;
+import btw.community.poopcats.interfaces.PoopCallback;
+import net.minecraft.src.DamageSource;
+import net.minecraft.src.EntityAnimal;
+import net.minecraft.src.EntityOcelot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityAnimal.class)
-public abstract class EntityOcelot_EntityAnimalMixin {
+public abstract class EntityAnimalMixin {
 
 	/**
 	 * Clear fed state when any animal dies.
@@ -20,7 +22,7 @@ public abstract class EntityOcelot_EntityAnimalMixin {
 		EntityAnimal animal = (EntityAnimal)(Object)this;
 
 		// Only handle ocelots/cats
-		if (animal instanceof EntityOcelot && animal instanceof PoopCats.PoopCallback callback) {
+		if (animal instanceof EntityOcelot && animal instanceof PoopCallback callback) {
 			callback.cats$setIsFed(false);
 			callback.cats$setWarningTicks(0);
 		}

@@ -1,10 +1,8 @@
 package btw.community.poopcats.util;
 
+import btw.community.poopcats.interfaces.PoopCallback;
 import net.minecraft.src.*;
 
-/**
- * AI task that makes ocelots seek out sand blocks when they need to poop
- */
 public class EntityAIOcelotSeekSand extends EntityAIBase {
 
 	private final EntityOcelot ocelot;
@@ -23,7 +21,7 @@ public class EntityAIOcelotSeekSand extends EntityAIBase {
 
 	@Override
 	public boolean shouldExecute() {
-		if (!(ocelot instanceof PoopCats.PoopCallback callback)) {
+		if (!(ocelot instanceof PoopCallback callback)) { // Use new interface
 			return false;
 		}
 
@@ -51,7 +49,7 @@ public class EntityAIOcelotSeekSand extends EntityAIBase {
 
 	@Override
 	public boolean continueExecuting() {
-		if (!(ocelot instanceof PoopCats.PoopCallback callback)) {
+		if (!(ocelot instanceof PoopCallback callback)) { // Use new interface
 			return false;
 		}
 
