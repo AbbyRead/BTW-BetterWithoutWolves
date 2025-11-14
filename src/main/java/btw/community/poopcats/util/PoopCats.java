@@ -29,7 +29,6 @@ public class PoopCats {
 		void cats$setIsFed(boolean fed);
 		void cats$setWarningTicks(int ticks);
 		int cats$getWarningTicks();
-		// NEW: Add accessors for swell time interpolation
 		int cats$getSwellTime();
 		int cats$getLastSwellTime();
 	}
@@ -84,7 +83,7 @@ public class PoopCats {
 	/**
 	 * Creates a custom explosion with red particle effects
 	 */
-	private static void explodeWithRedParticles(EntityLiving entity, World world) {
+	private static void explodeWithParticles(EntityLiving entity, World world) {
 		if (world.isRemote) return;
 
 		// Play explosion sound
@@ -206,42 +205,107 @@ public class PoopCats {
 			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 		}
 	}
-
 	/**
-	 * NEW: Client-side particle handler for the explosion
+	 * Creates a custom explosion with red particle effects
 	 */
+	private static void explodeWithRedParticles(EntityLiving entity, World world) {
+		if (world.isRemote) return;
+
+		// 1. FIX: Play our custom sound manually, as the explosion's internal sound is now suppressed.
+		world.playSoundAtEntity(entity, CAT_EXPLOSION_SOUND.sound(), 4.0F,
+				(1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
+
+		// 2. Create the explosion object manually
+		Explosion explosion = new Explosion(world, entity, entity.posX, entity.posY, entity.posZ, EXPLOSION_POWER);
+
+		// 3. Set flags to suppress default particles/sound but allow block damage
+		explosion.isFlaming = false;
+		explosion.isSmoking = true; // Keeps block-breaking logic active
+		explosion.suppressFX = true; // SUPPRESSES: Default sound, "hugeexplosion" particle, "largeexplode" particle
+
+		// 4. Calculate damage and affected blocks
+		explosion.doExplosionA();
+
+		// 5. Apply damage and block breaking, passing 'false' to suppress block-by-block particles
+		// This argument (par1 in Explosion.java) stops the smaller "explode" and "smoke" particles for each block destroyed.
+		explosion.doExplosionB(false);
+
+		// 6. Tell clients to spawn our custom particles
+		if (!world.isRemote) {
+			// Server tells clients to spawn particles
+			world.setEntityState(entity, (byte)35); // Custom particle event ID
+		}
+	}
+
+
+	// ... (rest of the file remains the same)
+
 	@Environment(EnvType.CLIENT)
 	public static void handleExplosionParticles(EntityOcelot cat) {
 		World world = cat.worldObj;
 		Minecraft mc = Minecraft.getMinecraft();
 
+		// --- Brown "Poof" Cloud (our replacement for grey smoke) ---
+		int poofCount = 20;
+		float brownRed = 0.4f;
+		float brownGreen = 0.25f;
+		float brownBlue = 0.1f;
+
+		for (int i = 0; i < poofCount; ++i) {
+			double motionX = (world.rand.nextGaussian() * 0.02D) + (world.rand.nextDouble() - 0.5D) * 0.2D;
+			double motionY = (world.rand.nextGaussian() * 0.02D) + world.rand.nextDouble() * 0.4D;
+			double motionZ = (world.rand.nextGaussian() * 0.02D) + (world.rand.nextDouble() - 0.5D) * 0.2D;
+
+			double posX = cat.posX + (world.rand.nextFloat() - 0.5D) * (double)cat.width;
+			double posY = cat.posY + world.rand.nextDouble() * (double)cat.height;
+			double posZ = cat.posZ + (world.rand.nextFloat() - 0.5D) * (double)cat.width;
+
+			// Use EntitySmokeFX
+			EntityFX poof = new EntitySmokeFX(
+					world,
+					posX,
+					posY,
+					posZ,
+					motionX,
+					motionY,
+					motionZ,
+					1.5f
+			);
+
+			// Color it brown
+			poof.setRBGColorF(
+					brownRed + world.rand.nextFloat() * 0.1f,
+					brownGreen + world.rand.nextFloat() * 0.05f,
+					brownBlue + world.rand.nextFloat() * 0.05f
+			);
+
+			mc.effectRenderer.addEffect(poof);
+		}
+
 		// --- Globs (using EntityDropParticleFX) ---
-		int globCount = 30; // Number of blood globs
+		int globCount = 30;
 		float bloodRed = 0.5F;
 		float bloodGreen = 0.0F;
 		float bloodBlue = 0.0F;
 
 		for (int i = 0; i < globCount; ++i) {
-			double motionX = (world.rand.nextDouble() - 0.5D) * 1.0D; // Stronger horizontal motion
-			double motionY = world.rand.nextDouble() * 0.5D + 0.5D; // Upward motion
+			double motionX = (world.rand.nextDouble() - 0.5D) * 1.0D;
+			double motionY = world.rand.nextDouble() * 0.5D + 0.5D;
 			double motionZ = (world.rand.nextDouble() - 0.5D) * 1.0D;
 
-			// Use the custom constructor from EntityDropParticleFX
-			// We pass Material.lava so the particle "splats" on the ground
 			EntityFX glob = new EntityDropParticleFX(
 					world,
 					cat.posX,
-					cat.posY + 0.5D, // Start from center of cat
+					cat.posY + 0.5D,
 					cat.posZ,
-					Material.lava, // Use lava material to "splat" on ground
-					0,             // bobTimer = 0, so it flies immediately
+					Material.lava,
+					0,
 					bloodRed,
 					bloodGreen,
 					bloodBlue,
-					1.0F           // alpha
+					1.0F
 			);
 
-			// The default constructor sets motion to 0, so we override it
 			glob.motionX = motionX;
 			glob.motionY = motionY;
 			glob.motionZ = motionZ;
@@ -257,20 +321,17 @@ public class PoopCats {
 			double posY = cat.posY + world.rand.nextDouble() * (double)cat.height;
 			double posZ = cat.posZ + (world.rand.nextDouble() - 0.5D) * (double)cat.width;
 
-			// Use reddust particle with red color
-			// EntityReddustFX(World, x, y, z, scale, R, G, B)
 			EntityFX spray = new EntityReddustFX(
 					world,
 					posX,
 					posY,
 					posZ,
 					1.0F,  // Scale
-					1.0F,  // R (this is a multiplier, so use 1.0 for full red)
+					1.0F,  // R
 					0.0F,  // G
 					0.0F   // B
 			);
 
-			// Give it some outward velocity
 			spray.motionX = (world.rand.nextDouble() - 0.5D) * 0.5D;
 			spray.motionY = world.rand.nextDouble() * 0.5D;
 			spray.motionZ = (world.rand.nextDouble() - 0.5D) * 0.5D;
@@ -278,5 +339,5 @@ public class PoopCats {
 			mc.effectRenderer.addEffect(spray);
 		}
 	}
-
+// ...
 }
